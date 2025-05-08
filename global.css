@@ -1,0 +1,157 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display&family=Lato:wght@300&family=Barlow+Semi+Condensed:wght@500&display=swap");
+
+body {
+  margin: 0;
+  line-height: normal;
+  overflow-y: auto;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Apply Playfair Display font to all headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+._welcomeTo__4tfan,
+._hotelHeading__2TGaO,
+._sectionTitle__MioTo,
+._welcomeToHotelParadiseContainer__dU8uF,
+._subHeading__wtNc8,
+._sectionHeader___KAdO {
+  font-family: "Playfair Display", serif;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  text-transform: uppercase;
+}
+
+/* Remove blinking animation from welcome text and set color to white */
+._welcomeTo__4tfan._blinkingText__Vhrq2 {
+  animation: none !important;
+  color: #ffffff !important; /* Set color to white */
+}
+
+/* Apply Lato light font to all description text */
+._hotelDescription__2NOyw,
+._aboutParagraph__phmIe,
+._serviceDescription__zdwaU,
+._footerDescription___03yW,
+._newsletterText__ajF99,
+._calloutText__pkjEg,
+.lato-thin,
+.lato-light,
+p {
+  font-family: "Lato", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+/* Apply Barlow Semi Condensed for buttons and navigation */
+button,
+._viewDetailsBtn__aUqtg,
+._ctaButton__esCdU,
+._subscribeBtn__WV2n_,
+a,
+._active__rz7l9,
+.barlow-semi-condensed-medium,
+li a,
+span {
+  font-family: "Barlow Semi Condensed", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  text-transform: uppercase;
+}
+
+/* Customize CTA section with white background and black text */
+._ctaSection__QGGSn {
+  background-image: none !important;
+  background-color: #ffffff !important;
+}
+
+._ctaOverlay__lQhUH {
+  background: transparent !important;
+}
+
+._ctaContent__4tYR1 h2,
+._ctaContent__4tYR1 p {
+  color: #000000 !important;
+}
+
+/* Branch contacts styling with increased spacing */
+._branchContacts__3L8BI {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 8rem !important; /* Further increased spacing between branch contacts */
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+}
+
+._branchContact___iwVo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 180px;
+}
+
+._branchName__aVaId {
+  font-family: "Barlow Semi Condensed", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  color: #e8a345;
+}
+
+:root {
+  /* Colors */
+  --primary-color: #e8a345;
+  --primary-dark: #d89230;
+  --primary-light: rgba(232, 163, 69, 0.1);
+  --text-dark: #333;
+  --text-medium: #555;
+  --text-light: #888;
+  --bg-light: #fff;
+  --bg-off: #f9f9f9;
+  --bg-dark: #222;
+  --bg-darker: #111;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  --spacing-xxl: 5rem;
+
+  /* Layout */
+  --container-width: 1300px;
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --box-shadow-sm: 0 5px 15px rgba(0, 0, 0, 0.05);
+  --box-shadow-md: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+  /* Typography */
+  --font-family: "Poppins", sans-serif;
+  --font-size-xs: 0.9rem;
+  --font-size-sm: 1rem;
+  --font-size-md: 1.2rem;
+  --font-size-lg: 1.5rem;
+  --font-size-xl: 2rem;
+  --font-size-xxl: 2.5rem;
+  --font-size-xxxl: 3.5rem;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-default: 0.3s ease;
+  --transition-slow: 0.8s ease;
+}
