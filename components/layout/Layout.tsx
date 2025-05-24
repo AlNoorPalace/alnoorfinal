@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import Head from "next/head";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -15,6 +15,22 @@ const Layout: React.FC<LayoutProps> = ({
   title = "Al Noor Group of Hotels - Luxury Accommodations",
   description = "Experience luxury accommodations and exceptional service at Al Noor Group of Hotels. Book your stay today!",
 }) => {
+  const [email, setEmail] = useState<string>("");
+  const [subscribed, setSubscribed] = useState<boolean>(false);
+
+  const handleSubscribe = () => {
+    // Implement your subscribe logic here
+    setSubscribed(true);
+  };
+
+  // If Header requires mobileMenuOpen/setMobileMenuOpen, define them here as well
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
+
+  // Function to scroll to the top of the page
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <>
       <Head>
@@ -25,10 +41,15 @@ const Layout: React.FC<LayoutProps> = ({
       </Head>
 
       <div className="page-container">
-        <Header />
+        <Header mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
         <main>{children}</main>
-        <Footer />
-        <BackToTop />
+        <Footer
+          email={email}
+          setEmail={setEmail}
+          subscribed={subscribed}
+          handleSubscribe={handleSubscribe}
+        />
+        <BackToTop scrollToTop={scrollToTop} />
       </div>
     </>
   );

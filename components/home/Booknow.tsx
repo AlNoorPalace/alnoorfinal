@@ -35,13 +35,12 @@ const BookNowDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [dropdownPosition, setDropdownPosition] = useState("below");
-  const buttonRef = useRef(null);
-  const dropdownRef = useRef(null);
-
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null); // or appropriate type
   // Form states
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState(null);
+  const [selectedBranch, setSelectedBranch] = useState<BranchData | null>(null);
   const [formData, setFormData] = useState<BookingFormData>({
     name: "",
     phone: "",
@@ -166,12 +165,12 @@ const BookNowDropdown = () => {
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event:MouseEvent) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(event.target) &&
+        !dropdownRef.current.contains(event.target as Node) &&
         buttonRef.current &&
-        !buttonRef.current.contains(event.target)
+        !buttonRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -192,11 +191,11 @@ const BookNowDropdown = () => {
   }, [isOpen]);
 
   // Format price with commas
-  const formatPrice = (price) => {
+  const formatPrice = (price:number) => {
     return price ? price.toLocaleString() : "";
   };
 
-  const handleBranchSelect = (branch) => {
+  const handleBranchSelect = (branch:BranchData) => {
     console.log(`Selected branch: ${branch.name}`);
     setIsOpen(false);
 
@@ -235,6 +234,10 @@ const BookNowDropdown = () => {
 
     // Find the "Other" branch option
     const otherBranch = branches.find((branch) => branch.name === "Other");
+    if (!otherBranch) {
+      console.error("Other branch not found!");
+      return;
+    }
 
     // Set the selected branch to "Other"
     setSelectedBranch(otherBranch);
@@ -263,7 +266,7 @@ const BookNowDropdown = () => {
   };
 
   // Handle room type selection
-  const handleRoomTypeSelect = (roomName) => {
+  const handleRoomTypeSelect = (roomName:string) => {
     setFormData((prev) => ({
       ...prev,
       roomType: roomName,

@@ -25,6 +25,7 @@ export type ReviewData = {
   quote: string;
   name: string;
   img: string;
+  email?:string
 };
 
 // Stats interface
