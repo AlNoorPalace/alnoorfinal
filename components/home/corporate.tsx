@@ -12,6 +12,9 @@ import {
 
 const CorporateSection = () => {
   const [showForm, setShowForm] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1024
+  );
   const [formData, setFormData] = useState({
     fullName: "",
     phoneNumber: "",
@@ -22,15 +25,26 @@ const CorporateSection = () => {
     numberOfDays: "",
     roomType: "",
     additionalRequests: "",
+    isCorporateBooking: true,
   });
 
-  // Create a new style object for the corporate section that inherits from the existing styles
+  // Handle window resize for responsive design
+  React.useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Create a new style object for the corporate section
   const corporateStyles = {
     corporateSection: {
       marginTop: "3rem",
       padding: "2rem",
       borderRadius: "12px",
-      background: "linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%)",
+      background: "linear-gradient(135deg, #fdf1e0 0%, #fdf1e0 100%)",
       boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
       border: "1px solid #d0d9f0",
       textAlign: "center" as const,
@@ -122,22 +136,29 @@ const CorporateSection = () => {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      backgroundColor: "rgba(0, 0, 0, 0.6)",
       display: "flex",
       justifyContent: "center",
-      alignItems: "center",
+      alignItems: "flex-start",
       zIndex: 1000,
+      padding: "1rem",
+      overflowY: "auto" as const,
+      backdropFilter: "blur(5px)",
     },
     formContainer: {
       background: "white",
-      borderRadius: "12px",
+      borderRadius: "16px",
       padding: "2rem",
-      width: "90%",
-      maxWidth: "800px",
-      maxHeight: "90vh",
+      width: "100%",
+      maxWidth: "900px",
+      minHeight: "fit-content",
+      maxHeight: "calc(100vh - 2rem)",
       overflowY: "auto" as const,
       position: "relative" as const,
-      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.1)",
+      boxShadow: "0 20px 50px rgba(0, 0, 0, 0.15)",
+      margin: "1rem 0",
+      transform: "translateZ(0)",
+      WebkitOverflowScrolling: "touch" as const,
     },
     closeButton: {
       position: "absolute" as const,
@@ -156,6 +177,28 @@ const CorporateSection = () => {
       marginBottom: "1.5rem",
       textAlign: "center" as const,
     },
+    corporateCheckbox: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "0.5rem",
+      marginBottom: "1.5rem",
+      padding: "1rem",
+      background: "#f0f4ff",
+      borderRadius: "8px",
+      border: "1px solid #3E48A8",
+    },
+    checkbox: {
+      width: "20px",
+      height: "20px",
+      accentColor: "#3E48A8",
+    },
+    checkboxLabel: {
+      fontSize: "1rem",
+      fontWeight: "600",
+      color: "#3E48A8",
+      margin: 0,
+    },
     formGroup: {
       marginBottom: "1.25rem",
       textAlign: "left" as const,
@@ -173,6 +216,7 @@ const CorporateSection = () => {
       borderRadius: "6px",
       border: "1px solid #ddd",
       fontSize: "1rem",
+      boxSizing: "border-box" as const,
     },
     select: {
       width: "100%",
@@ -181,6 +225,7 @@ const CorporateSection = () => {
       border: "1px solid #ddd",
       fontSize: "1rem",
       backgroundColor: "white",
+      boxSizing: "border-box" as const,
     },
     textarea: {
       width: "100%",
@@ -190,11 +235,14 @@ const CorporateSection = () => {
       fontSize: "1rem",
       minHeight: "100px",
       resize: "vertical" as const,
+      boxSizing: "border-box" as const,
     },
     buttonGroup: {
       display: "flex",
       justifyContent: "space-between",
-      marginTop: "1.5rem",
+      gap: "1rem",
+      marginTop: "2rem",
+      flexWrap: "wrap" as const,
     },
     cancelButton: {
       padding: "0.75rem 1.5rem",
@@ -206,6 +254,8 @@ const CorporateSection = () => {
       color: "#666",
       border: "none",
       transition: "background 0.3s ease",
+      minWidth: "120px",
+      flex: "1",
     },
     submitButton: {
       padding: "0.75rem 1.5rem",
@@ -218,10 +268,12 @@ const CorporateSection = () => {
       border: "none",
       transition: "background 0.3s ease",
       boxShadow: "0 4px 10px rgba(62, 72, 168, 0.3)",
+      minWidth: "120px",
+      flex: "1",
     },
     roomTypesGrid: {
       display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+      gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
       gap: "1rem",
       marginTop: "0.5rem",
     },
@@ -252,9 +304,53 @@ const CorporateSection = () => {
       color: "#e74c3c",
       marginBottom: "0.5rem",
     },
+    totalAmount: {
+      fontSize: "1.2rem",
+      fontWeight: "bold",
+      color: "#3E48A8",
+      textAlign: "center" as const,
+      margin: "1rem 0",
+      padding: "1rem",
+      background: "#f0f4ff",
+      borderRadius: "8px",
+    },
     required: {
       color: "#e74c3c",
     },
+  };
+
+  // Add responsive styles and media queries
+  const getResponsiveStyles = () => {
+    const isMobile = windowWidth <= 768;
+    const isTablet = windowWidth <= 1024 && windowWidth > 768;
+
+    return {
+      formContainer: {
+        ...corporateStyles.formContainer,
+        padding: isMobile ? "1.5rem" : "2rem",
+        margin: isMobile ? "0.5rem" : "1rem 0",
+        maxWidth: isMobile ? "100%" : isTablet ? "700px" : "900px",
+      },
+      roomTypesGrid: {
+        ...corporateStyles.roomTypesGrid,
+        gridTemplateColumns: isMobile
+          ? "1fr"
+          : "repeat(auto-fit, minmax(280px, 1fr))",
+      },
+      buttonGroup: {
+        ...corporateStyles.buttonGroup,
+        flexDirection: isMobile ? ("column" as const) : ("row" as const),
+      },
+      formTitle: {
+        ...corporateStyles.formTitle,
+        fontSize: isMobile ? "1.3rem" : "1.5rem",
+      },
+      corporateCheckbox: {
+        ...corporateStyles.corporateCheckbox,
+        flexDirection: isMobile ? ("column" as const) : ("row" as const),
+        textAlign: isMobile ? ("center" as const) : ("left" as const),
+      },
+    };
   };
 
   const corporateAmenities = [
@@ -293,79 +389,59 @@ const CorporateSection = () => {
   const roomTypes = [
     {
       name: "Deluxe",
-      price: "₹2,500",
+      price: 799,
+      displayPrice: "₹799 onwards",
       description:
-        "Our cozy Deluxe room offers comfort and convenience for your stay. Featuring modern amenities for a refreshing experience.",
+        "Our cozy Deluxe room offers comfort and convenience for your stay.",
       features: ["1 Bed", "1 Bath", "Free WiFi"],
-      inclusions: [
-        "TV",
-        "Electric Kettle",
-        "Toiletries",
-        "Milk Powder/Tea Packet/Sugar",
-        "Dental Kit/Soap/Shampoo/Shaving Kit/Comb",
-      ],
     },
     {
       name: "Deluxe Triple",
-      price: "₹3,500",
+      price: 1500,
+      displayPrice: "₹1,500 onwards",
       description:
-        "Perfect for families or small groups, our Deluxe Triple offers spacious accommodation with all essential amenities for a comfortable stay.",
+        "Perfect for families or small groups, our Deluxe Triple offers spacious accommodation.",
       features: ["3 Beds", "1 Bath", "Free WiFi"],
-      inclusions: [
-        "TV",
-        "Electric Kettle",
-        "Toiletries",
-        "Milk Powder/Tea Packet/Sugar Sachet",
-      ],
     },
     {
       name: "Deluxe Quad",
-      price: "₹4,000",
+      price: 2000,
+      displayPrice: "₹2,000 onwards",
       description:
-        "Our Deluxe Quad room provides ample space for four guests with additional amenities. Enjoy premium bedding and modern facilities throughout your stay.",
+        "Our Deluxe Quad room provides ample space for four guests with additional amenities.",
       features: ["4 Beds", "1 Bath", "Free WiFi"],
-      inclusions: [
-        "TV",
-        "Electric Kettle",
-        "Toiletries",
-        "Milk Powder/Tea Packet/Sugar Sachet",
-      ],
     },
     {
       name: "King Suite",
-      price: "₹4,500",
+      price: 2500,
+      displayPrice: "₹2,500 onwards",
       description:
-        "Experience luxury in our King Suite featuring elegant decor, premium bedding, and spacious living area. Perfect for those seeking an elevated stay experience.",
+        "Experience luxury in our King Suite featuring elegant decor and premium bedding.",
       features: ["2 Beds", "1 Bath", "Free WiFi"],
-      inclusions: [
-        "TV",
-        "Electric Kettle",
-        "Toiletries",
-        "Milk Powder/Tea Packet/Sugar Sachet",
-      ],
       featured: true,
     },
     {
       name: "Residential Suite",
-      price: "₹6,000",
+      price: 3000,
+      displayPrice: "₹3,000 onwards",
       description:
-        "Our most spacious and luxurious offering. The Residential Suite provides all the comforts of home with the luxury of a premium hotel stay.",
+        "Our most spacious and luxurious offering with all the comforts of home.",
       features: ["2 Beds", "1 Bath", "Free WiFi"],
-      inclusions: [
-        "TV",
-        "Electric Kettle",
-        "Toiletries",
-        "Milk Powder/Tea Packet/Sugar Sachet",
-      ],
       featured: true,
     },
   ];
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
@@ -376,24 +452,78 @@ const CorporateSection = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const calculateTotalAmount = () => {
+    if (!formData.roomType || !formData.numberOfDays) return 0;
+
+    const selectedRoom = roomTypes.find(
+      (room) => room.name === formData.roomType
+    );
+    if (!selectedRoom) return 0;
+
+    const baseAmount = selectedRoom.price * parseInt(formData.numberOfDays);
+    // Apply 20% corporate discount
+    const discount = formData.isCorporateBooking ? 0.2 : 0;
+    const discountedAmount = baseAmount * (1 - discount);
+
+    return discountedAmount;
+  };
+
+  const [isSubmitting,setIsSubmitting]=useState(false);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    console.log(formData);
     e.preventDefault();
-    // Here you would typically send the form data to your backend
-    console.log("Form submitted:", formData);
-    alert("Thank you for your booking request! We will contact you shortly.");
-    setShowForm(false);
-    // Reset form data
-    setFormData({
-      fullName: "",
-      phoneNumber: "",
-      email: "",
-      branch: "",
-      checkIn: "",
-      checkOut: "",
-      numberOfDays: "",
-      roomType: "",
-      additionalRequests: "",
-    });
+  
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+  
+    try {
+      const response = await fetch("/api/send-booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.fullName,
+          phone: formData.phoneNumber,
+          email: formData.email,
+          branch: formData.branch+" Branch",
+          checkin: formData.checkIn,
+          checkout: formData.checkOut,
+          days: formData.numberOfDays,
+          room_type: formData.roomType,
+          query: formData.additionalRequests,
+          isCorporateBooking: formData.isCorporateBooking, 
+        }),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        alert("Thank you for your booking request! We will contact you shortly.");
+        setShowForm(false);
+        setFormData({
+          fullName: "",
+          phoneNumber: "",
+          email: "",
+          branch: "",
+          checkIn: "",
+          checkOut: "",
+          numberOfDays: "",
+          roomType: "",
+          additionalRequests: "",
+          isCorporateBooking: true
+
+        });
+      } else {
+        console.error("Booking API error:", result.error);
+        alert("❌ Failed to send booking. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Error sending booking:", error);
+      alert("❌ Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Calculate number of days when check-in or check-out dates change
@@ -403,10 +533,10 @@ const CorporateSection = () => {
       const checkOut = new Date(formData.checkOut);
       const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         numberOfDays: diffDays.toString(),
-      });
+      }));
     }
   }, [formData.checkIn, formData.checkOut]);
 
@@ -460,14 +590,34 @@ const CorporateSection = () => {
 
       {showForm && (
         <div style={corporateStyles.formOverlay}>
-          <div style={corporateStyles.formContainer}>
+          <div style={getResponsiveStyles().formContainer}>
             <button
               style={corporateStyles.closeButton}
               onClick={() => setShowForm(false)}
             >
               <FaTimes />
             </button>
-            <h3 style={corporateStyles.formTitle}>Corporate Booking Request</h3>
+            <h3 style={getResponsiveStyles().formTitle}>
+              Hotel Booking Request
+            </h3>
+
+            <div style={getResponsiveStyles().corporateCheckbox}>
+              <input
+                type="checkbox"
+                id="corporateBooking"
+                name="isCorporateBooking"
+                checked={formData.isCorporateBooking}
+                onChange={handleInputChange}
+                style={corporateStyles.checkbox}
+              />
+              <label
+                htmlFor="corporateBooking"
+                style={corporateStyles.checkboxLabel}
+              >
+                Corporate Booking (20% Discount Applied)
+              </label>
+            </div>
+
             <form onSubmit={handleSubmit}>
               <div style={corporateStyles.formGroup}>
                 <label style={corporateStyles.label}>
@@ -482,6 +632,7 @@ const CorporateSection = () => {
                   required
                 />
               </div>
+
               <div style={corporateStyles.formGroup}>
                 <label style={corporateStyles.label}>
                   Phone Number <span style={corporateStyles.required}>*</span>
@@ -495,6 +646,7 @@ const CorporateSection = () => {
                   required
                 />
               </div>
+
               <div style={corporateStyles.formGroup}>
                 <label style={corporateStyles.label}>
                   Email Address <span style={corporateStyles.required}>*</span>
@@ -508,6 +660,7 @@ const CorporateSection = () => {
                   required
                 />
               </div>
+
               <div style={corporateStyles.formGroup}>
                 <label style={corporateStyles.label}>
                   Select Branch <span style={corporateStyles.required}>*</span>
@@ -523,8 +676,10 @@ const CorporateSection = () => {
                   <option value="Triplicane">Triplicane Branch</option>
                   <option value="Parrys">Parrys Branch</option>
                   <option value="Bengaluru">Bengaluru Branch</option>
+                  <option value="Other">Other Branch</option>
                 </select>
               </div>
+
               <div style={corporateStyles.formGroup}>
                 <label style={corporateStyles.label}>
                   Check-in Date <span style={corporateStyles.required}>*</span>
@@ -538,6 +693,7 @@ const CorporateSection = () => {
                   required
                 />
               </div>
+
               <div style={corporateStyles.formGroup}>
                 <label style={corporateStyles.label}>
                   Check-out Date <span style={corporateStyles.required}>*</span>
@@ -551,6 +707,7 @@ const CorporateSection = () => {
                   required
                 />
               </div>
+
               <div style={corporateStyles.formGroup}>
                 <label style={corporateStyles.label}>Number of Days</label>
                 <input
@@ -562,12 +719,13 @@ const CorporateSection = () => {
                   readOnly
                 />
               </div>
+
               <div style={corporateStyles.formGroup}>
                 <label style={corporateStyles.label}>
                   Select Room Type{" "}
                   <span style={corporateStyles.required}>*</span>
                 </label>
-                <div style={corporateStyles.roomTypesGrid}>
+                <div style={getResponsiveStyles().roomTypesGrid}>
                   {roomTypes.map((room, index) => (
                     <div
                       key={index}
@@ -586,7 +744,9 @@ const CorporateSection = () => {
                           </span>
                         )}
                       </div>
-                      <div style={corporateStyles.roomPrice}>{room.price}</div>
+                      <div style={corporateStyles.roomPrice}>
+                        {room.displayPrice}
+                      </div>
                       <div
                         style={{ fontSize: "0.85rem", marginBottom: "0.5rem" }}
                       >
@@ -596,18 +756,43 @@ const CorporateSection = () => {
                   ))}
                 </div>
               </div>
+
+              {formData.roomType && formData.numberOfDays && (
+                <div style={corporateStyles.totalAmount}>
+                  Total Amount: ₹{calculateTotalAmount().toLocaleString()}
+                  {formData.isCorporateBooking && (
+                    <div
+                      style={{
+                        fontSize: "0.9rem",
+                        color: "#e74c3c",
+                        marginTop: "0.5rem",
+                      }}
+                    >
+                      (20% Corporate Discount Applied)
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={corporateStyles.formGroup}>
                 <label style={corporateStyles.label}>
-                  Additional Requests or Queries
+                  Additional Requests or Queries{" "}
+                  {formData.branch === "Other" && "- Mention Branch Name"}
                 </label>
                 <textarea
                   name="additionalRequests"
                   value={formData.additionalRequests}
                   onChange={handleInputChange}
                   style={corporateStyles.textarea}
+                  placeholder={
+                    formData.branch === "Other"
+                      ? "Please mention the branch name and any other requests..."
+                      : "Any special requests or queries..."
+                  }
                 ></textarea>
               </div>
-              <div style={corporateStyles.buttonGroup}>
+
+              <div style={getResponsiveStyles().buttonGroup}>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
@@ -615,8 +800,8 @@ const CorporateSection = () => {
                 >
                   Cancel
                 </button>
-                <button type="submit" style={corporateStyles.submitButton}>
-                  Submit Booking
+                <button type="submit" style={corporateStyles.submitButton} disabled={isSubmitting}>
+                {isSubmitting?"Sending":"Submit Booking"}
                 </button>
               </div>
             </form>

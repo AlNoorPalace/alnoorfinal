@@ -1,0 +1,283 @@
+/* Book Now Button */
+.bookNowBtn {
+  background-color: #ffcc00;
+  color: white;
+  font-weight: 600;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 16px;
+  transition: all 0.3s ease;
+}
+
+.bookNowBtn:hover {
+  background-color: #e6b800;
+  transform: translateY(-2px);
+}
+
+.bookingBtnContainer {
+  position: relative;
+  display: inline-block;
+}
+
+/* Booking Dropdown */
+.bookingDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.searchContainer {
+  padding: 16px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.branchOptions {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.branchOption {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.branchOption:hover {
+  background-color: #f7f7f7;
+}
+
+.notFoundOption {
+  padding: 12px 16px;
+  color: #0066cc;
+  cursor: pointer;
+  font-weight: 500;
+  border-top: 1px solid #eaeaea;
+}
+
+.notFoundOption:hover {
+  background-color: #f0f7ff;
+}
+
+/* Booking Form */
+.bookingFormOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.bookingForm {
+  background: white;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+}
+
+.formHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.formHeader h2 {
+  font-size: 24px;
+  margin: 0;
+  color: #333;
+}
+
+.closeFormBtn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.formInput,
+.formSelect,
+.formTextarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.formTextarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.formInput:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+.formRow {
+  display: flex;
+  gap: 16px;
+}
+
+.formRow .formGroup {
+  flex: 1;
+}
+
+.searchedLocation {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Room Selection */
+.roomTypeSection {
+  margin-bottom: 24px;
+}
+
+.roomOptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.roomOption {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.roomOption:hover {
+  border-color: #ffcc00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.selectedRoom {
+  border-color: #ffcc00;
+  background-color: #fffdf0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.roomHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.roomHeader h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.price {
+  font-weight: 700;
+  color: #333;
+}
+
+.featuredRoom {
+  position: relative;
+}
+
+.featured {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  background: #ffcc00;
+  color: white;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 0 8px 0 8px;
+}
+
+/* Form Actions */
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancelBtn {
+  padding: 10px 20px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submitBtn {
+  padding: 10px 20px;
+  background: #ffcc00;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .formRow {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .roomOptions {
+    grid-template-columns: 1fr;
+  }
+
+  .bookingDropdown {
+    width: 250px;
+  }
+}

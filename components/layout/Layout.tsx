@@ -1,4 +1,4 @@
-import { ReactNode, useState,FormEvent } from "react";
+import { ReactNode } from "react";
 import Head from "next/head";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -15,22 +15,6 @@ const Layout: React.FC<LayoutProps> = ({
   title = "Al Noor Group of Hotels - Luxury Accommodations",
   description = "Experience luxury accommodations and exceptional service at Al Noor Group of Hotels. Book your stay today!",
 }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-
-
-  const handleSubscribe = (e: FormEvent) => {
-    e.preventDefault();
-    setSubscribed(true);
-    setEmail(""); // clear input after subscribing
-    // Optionally: add actual API call here
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   return (
     <>
       <Head>
@@ -41,16 +25,10 @@ const Layout: React.FC<LayoutProps> = ({
       </Head>
 
       <div className="page-container">
-         <Header mobileMenuOpen={mobileMenuOpen}
-          setMobileMenuOpen={setMobileMenuOpen}></Header>
+        <Header />
         <main>{children}</main>
-        <Footer
-          email={email}
-          setEmail={setEmail}
-          subscribed={subscribed}
-          handleSubscribe={handleSubscribe}
-        />
-       <BackToTop scrollToTop={scrollToTop}></BackToTop>
+        <Footer />
+        <BackToTop />
       </div>
     </>
   );

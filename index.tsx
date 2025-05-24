@@ -7,6 +7,7 @@ import styles from "./index.module.css";
 // Import components
 import Header from "./components/layout/Header";
 import Hero from "./components/home/Hero";
+import BookNowDropdown from "./components/home/Booknow";
 // import BookingForm from "./components/home/Bookingform";
 import About from "./components/home/About";
 import Stats from "./components/home/Stats";
@@ -61,7 +62,7 @@ const LandingPage: NextPage = () => {
       hasWifi: true,
       description:
         "Our cozy Deluxe room offers comfort and convenience for your stay. Featuring modern amenities for a refreshing experience.",
-      pricePerNight: 2500,
+      pricePerNight: 799,
       amenities: commonAmenities,
       inclusions: [
         "TV/Electric Kettle",
@@ -78,7 +79,7 @@ const LandingPage: NextPage = () => {
       hasWifi: true,
       description:
         "Perfect for families or small groups, our Deluxe Triple offers spacious accommodation with all essential amenities for a comfortable stay.",
-      pricePerNight: 3500,
+      pricePerNight: 1500,
       amenities: commonAmenities,
       inclusions: [
         "TV",
@@ -95,7 +96,7 @@ const LandingPage: NextPage = () => {
       hasWifi: true,
       description:
         "Our Deluxe Quad room provides ample space for four guests with additional amenities. Enjoy premium bedding and modern facilities throughout your stay.",
-      pricePerNight: 4000,
+      pricePerNight: 2000,
       amenities: commonAmenities,
       inclusions: [
         "TV",
@@ -112,7 +113,7 @@ const LandingPage: NextPage = () => {
       hasWifi: true,
       description:
         "Experience luxury in our King Suite featuring elegant decor, premium bedding, and spacious living area. Perfect for those seeking an elevated stay experience.",
-      pricePerNight: 4500,
+      pricePerNight: 2500,
       featured: true,
       amenities: commonAmenities,
       inclusions: [
@@ -130,7 +131,7 @@ const LandingPage: NextPage = () => {
       hasWifi: true,
       description:
         "Our premium Residential Suite offers an ultimate home-away-from-home experience with separate living and dining areas. Ideal for extended stays or family vacations.",
-      pricePerNight: 6000,
+      pricePerNight: 3000,
       featured: true,
       amenities: commonAmenities,
       inclusions: [
@@ -339,6 +340,9 @@ const LandingPage: NextPage = () => {
 
         {/* Rooms Section Component */}
         <Rooms rooms={rooms} onBookNow={handleBookNow} />
+
+        {/* ADD: Corporate Section Component - This is what you were missing! */}
+        <CorporateSection />
 
         {/* Services Section Component */}
         <Services services={services} />

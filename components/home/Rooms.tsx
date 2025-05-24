@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import styles from "../../index.module.css";
 import {
@@ -16,7 +16,7 @@ import {
 import { FaParking } from "react-icons/fa";
 import { MdCleaningServices, MdSmokeFree } from "react-icons/md";
 import { GiHairStrands, GiWaterDrop, GiTeapot } from "react-icons/gi";
-import CorporateSection from "./corporate"; // Import the new CorporateSection component
+// REMOVED: import CorporateSection from "./corporate";
 
 // Enhanced Room Data type with more details
 interface RoomData {
@@ -75,8 +75,7 @@ const branches: BranchData[] = [
   },
 ];
 
-// Define common amenities and default rooms to prevent compilation errors
-// This is just a placeholder since the commented code suggests these would be defined
+// Define common amenities and default rooms
 const commonAmenities = [
   "Fridge",
   "Power Backup",
@@ -95,7 +94,7 @@ const defaultRooms: RoomData[] = [
     hasWifi: true,
     description:
       "Our cozy Deluxe room offers comfort and convenience for your stay.",
-    pricePerNight: 2500,
+    pricePerNight: 799,
     amenities: commonAmenities,
     inclusions: ["TV", "Electric Kettle", "Toiletries"],
   },
@@ -106,7 +105,7 @@ const defaultRooms: RoomData[] = [
     bedCount: 3,
     hasWifi: true,
     description: "Perfect for families or small groups.",
-    pricePerNight: 3500,
+    pricePerNight: 1500,
     amenities: commonAmenities,
     inclusions: ["TV", "Electric Kettle", "Toiletries"],
   },
@@ -117,7 +116,7 @@ const defaultRooms: RoomData[] = [
     bedCount: 4,
     hasWifi: true,
     description: "Our Deluxe Quad room provides ample space for four guests.",
-    pricePerNight: 4000,
+    pricePerNight: 2000,
     amenities: commonAmenities,
     inclusions: ["TV", "Electric Kettle", "Toiletries"],
   },
@@ -128,7 +127,7 @@ const defaultRooms: RoomData[] = [
     bedCount: 2,
     hasWifi: true,
     description: "Experience luxury in our King Suite.",
-    pricePerNight: 4500,
+    pricePerNight: 2500,
     featured: true,
     amenities: commonAmenities,
     inclusions: ["TV", "Electric Kettle", "Toiletries"],
@@ -141,7 +140,7 @@ const defaultRooms: RoomData[] = [
     hasWifi: true,
     description:
       "Our premium Residential Suite offers home-away-from-home experience.",
-    pricePerNight: 6000,
+    pricePerNight: 3000,
     featured: true,
     amenities: commonAmenities,
     inclusions: ["TV", "Electric Kettle", "Toiletries"],
@@ -171,7 +170,6 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
   const [selectedRoom, setSelectedRoom] = useState<RoomData | null>(null);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [displayCount, setDisplayCount] = useState(5);
   const [formData, setFormData] = useState<BookingFormData>({
     name: "",
     phone: "",
@@ -183,6 +181,7 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
     additionalQuery: "",
   });
   const [formErrors, setFormErrors] = useState<Partial<BookingFormData>>({});
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Simulate loading effect
   useEffect(() => {
@@ -191,6 +190,17 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Scroll modal into view when it opens
+  useEffect(() => {
+    if (showBookingForm && modalRef.current) {
+      // Scroll the modal into view with a smooth animation
+      modalRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [showBookingForm]);
 
   // Calculate number of days between check-in and check-out dates
   useEffect(() => {
@@ -205,9 +215,6 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
       }
     }
   }, [formData.checkInDate, formData.checkOutDate]);
-
-  // Determine how many rooms to display based on screen width
-
 
   // Format price with comma separators
   const formatPrice = (price: number) => {
@@ -291,9 +298,11 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
       errors.phone = "Please enter a valid 10-digit phone number";
     }
 
-    if (!formData.email.trim()) {
-      errors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+    // Email validation - only validate if email is provided (since it's optional)
+    if (
+      formData.email.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
+    ) {
       errors.email = "Please enter a valid email address";
     }
 
@@ -314,20 +323,56 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
   };
 
   // Handle form submission
-  const handleSubmitForm = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
+ 
+    if(isSubmitting)return // Prevent multiple submissions
 
+
+    setIsSubmitting(true); // Set submitting state
+
+
+try{
     if (validateForm()) {
       // Here you would typically send the data to your backend
       // For now, we'll just simulate a successful submission
       console.log("Form submitted:", formData);
       console.log("Selected room:", selectedRoom);
+console.log("Branch",formData.branch);
 
-      // Show success message
-      setFormSubmitted(true);
+      try {
+        const response = await fetch("/api/send-booking", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            room_type: selectedRoom?.title,
+            name: formData.name,
+            phone: formData.phone,
+            email: formData.email || "N/A",
+            branch: formData.branch,
+            checkin: formData.checkInDate,
+            checkout: formData.checkOutDate,
+            days: formData.numberOfDays,
+            query: formData.additionalQuery || "None",
+          }),
+        });
+      
+        if (response.ok) {
+          setFormSubmitted(true);
+          setTimeout(() => setShowBookingForm(false), 3000);
+        } else {
+          alert("❌ Failed to send booking email. Please try again.");
+        }
+      } catch (error) {
+        console.error("❌ API Error:", error);
+        alert("Something went wrong. Please try again later.");
+      }
+
 
       // In a real implementation, you would send this data to your backend
-      // which would then send an email to the hotel
       const emailBody = `
         Booking Details:
         ----------------
@@ -353,10 +398,13 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
         setShowBookingForm(false);
       }, 3000);
     }
+  }catch(error){
+  console.error("Error submitting form:", error);
+  alert("Something went wrong. Please try again later.");
+  }finally{
+    setIsSubmitting(false); // Reset submitting state
+  }
   };
-
-  // Slice rooms to display only the needed amount
-  const visibleRooms = rooms;
 
   return (
     <section className={`${styles.roomsSection} fade-in-element`} id="rooms">
@@ -384,7 +432,7 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
       </h3>
 
       <div className={styles.roomsGrid}>
-        {visibleRooms.map((room, index) => (
+        {rooms.map((room, index) => (
           <div
             key={`room-${index}`}
             className={`${styles.flipCard} ${isLoading ? styles.shimmer : ""}`}
@@ -403,26 +451,21 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
                   src={room.image}
                   alt={room.title}
                   width={400}
-                  height={180} // Reduced height
+                  height={180}
                   priority={index < 2}
                 />
                 <div className={styles.cardTitle}>
                   <h3>{room.title}</h3>
                   <p className={styles.cardPrice}>
-                    ₹{formatPrice(room.pricePerNight)}
+                    ₹{formatPrice(room.pricePerNight)} onwards
                   </p>
                 </div>
                 <div className={styles.amenitiesGrid}>
-                  {room.amenities?.slice(0, 5).map(
-                    (
-                      amenity,
-                      idx // Show fewer amenities
-                    ) => (
-                      <span key={idx}>
-                        {getAmenityIcon(amenity)} {amenity}
-                      </span>
-                    )
-                  )}
+                  {room.amenities?.slice(0, 5).map((amenity, idx) => (
+                    <span key={idx}>
+                      {getAmenityIcon(amenity)} {amenity}
+                    </span>
+                  ))}
                   {room.amenities && room.amenities.length > 5 && (
                     <span>+{room.amenities.length - 5} more</span>
                   )}
@@ -465,11 +508,9 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
 
                 <div className={styles.roomHighlights}>
                   <p className={styles.highlightsTitle}>Room Inclusions:</p>
-                  <div className={styles.inclusionTags}>
+                  <div className={styles.amenitiesGrid}>
                     {room.inclusions?.map((inclusion, idx) => (
-                      <span key={idx} className={styles.inclusionTag}>
-                        {inclusion}
-                      </span>
+                      <span key={idx}>{inclusion}</span>
                     ))}
                   </div>
                 </div>
@@ -477,7 +518,7 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
                   className={styles.bookNowBtn}
                   onClick={() => handleBookNow(room)}
                 >
-                  Book Now • ₹{formatPrice(room.pricePerNight)}/night
+                  Book Now • ₹{formatPrice(room.pricePerNight)} onwards/night
                 </button>
               </div>
             </div>
@@ -485,17 +526,16 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
         ))}
       </div>
 
-      {/* Corporate Section - Added here below the room cards */}
-      <CorporateSection />
+      {/* REMOVED: Corporate Section component from here */}
 
-      {/* Booking Form Modal */}
+      {/* Booking Form Modal - With scroll behavior */}
       {showBookingForm && selectedRoom && (
         <>
           <div
             className={styles.modalOverlay}
             onClick={() => !formSubmitted && setShowBookingForm(false)}
           />
-          <div className={styles.modal}>
+          <div ref={modalRef} className={styles.modal}>
             {formSubmitted ? (
               <div className={styles.successMessage}>
                 <h3>Thank You!</h3>
@@ -507,9 +547,15 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
               </div>
             ) : (
               <>
+                <button
+                  className={styles.closeModalBtn}
+                  onClick={() => setShowBookingForm(false)}
+                >
+                  ×
+                </button>
                 <h3>Book {selectedRoom.title}</h3>
                 <p className={styles.bookingPrice}>
-                  ₹{formatPrice(selectedRoom.pricePerNight)} per night
+                  ₹{formatPrice(selectedRoom.pricePerNight)} onwards per night
                 </p>
 
                 <form
@@ -553,7 +599,7 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
                   </div>
 
                   <div className={styles.formGroup}>
-                    <label htmlFor="email">Email Address *</label>
+                    <label htmlFor="email">Email Address (Optional)</label>
                     <input
                       type="email"
                       id="email"
@@ -561,7 +607,6 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
                       value={formData.email}
                       onChange={handleInputChange}
                       className={formErrors.email ? styles.inputError : ""}
-                      required
                     />
                     {formErrors.email && (
                       <span className={styles.errorText}>
@@ -662,9 +707,9 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
                     <span>
                       ₹
                       {formatPrice(
-                        (selectedRoom.pricePerNight || 0) *
-                          formData.numberOfDays
-                      )}
+                        selectedRoom.pricePerNight * formData.numberOfDays
+                      )}{" "}
+                      onwards
                     </span>
                   </div>
 
@@ -676,8 +721,8 @@ const Rooms: React.FC<RoomsProps> = ({ rooms = defaultRooms, onBookNow }) => {
                     >
                       Cancel
                     </button>
-                    <button type="submit" className={styles.submitButton}>
-                      Submit Booking
+                    <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
+                    {isSubmitting?"Sending":"Submit Booking"}
                     </button>
                   </div>
                 </form>
