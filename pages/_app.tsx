@@ -1,7 +1,9 @@
-import '../global.css';
+import '../styles/globals.css';
 import type { AppProps } from 'next/app';
 import Script from 'next/script';
 import Head from 'next/head';
+import { BookingProvider } from '../components/site/BookingContext';
+import BookingModal from '../components/site/BookingModal';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -58,7 +60,10 @@ function MyApp({ Component, pageProps }: AppProps) {
         }}
       />
       
-      <Component {...pageProps} />
+      <BookingProvider>
+        <Component {...pageProps} />
+        <BookingModal />
+      </BookingProvider>
     </>
   );
 }
