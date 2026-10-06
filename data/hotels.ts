@@ -2,6 +2,11 @@
 // Content comes from the original site (pages/hotels.tsx, components/home/Rooms.tsx,
 // index.tsx, Footer.tsx). Prices are "onwards" rates in INR per night.
 
+// Canonical site URL. Override per environment with NEXT_PUBLIC_SITE_URL.
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://alnoorpalace.in"
+).replace(/\/$/, "");
+
 export const CONTACT = {
   phones: [
     { label: "+91 73389 44222", tel: "+917338944222" },

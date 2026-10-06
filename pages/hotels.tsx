@@ -1,6 +1,7 @@
-import Head from "next/head";
 import { useRouter } from "next/router";
 import { motion } from "framer-motion";
+import Seo from "../components/site/Seo";
+import { hotelGroupJsonLd } from "../data/seo";
 import SiteHeader from "../components/site/SiteHeader";
 import SiteFooter from "../components/site/SiteFooter";
 import HotelCard, { HelpCard } from "../components/site/HotelCard";
@@ -22,28 +23,15 @@ export default function HotelsPage() {
 
   return (
     <>
-      <Head>
-        <title>Our Hotels - Al Noor Group of Hotels Locations</title>
-        <meta
-          name="description"
-          content="Find the best hotels in Triplicane, Parrys, Electronic City, Koramangala, Koyambedu, Hyderabad and Ooty. Affordable, budget-friendly rooms with premium amenities at every Al Noor branch."
-        />
-        <meta
-          name="keywords"
-          content="best hotels in triplicane, best hotels in parrys, best hotels in electronic city, best hotels in koramangala, best hotels in koyambedu, best hotels in hyderabad, best hotels in ooty, al noor hotels locations, budget hotels india"
-        />
-        <link rel="canonical" href="https://alnoorpalace.in/hotels" />
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="Our Hotels - Al Noor Group" />
-        <meta
-          property="og:description"
-          content="Discover Al Noor hotels across Triplicane, Parrys, Bengaluru, Hyderabad and Ooty."
-        />
-        <meta property="og:url" content="https://alnoorpalace.in/hotels" />
-      </Head>
+      <Seo
+        title="Our Hotels | Al Noor Group of Hotels"
+        description="Explore Al Noor hotels in Triplicane, Parrys and Koyambedu (Chennai), Electronic City and Koramangala (Bengaluru), Hyderabad and Ooty. See rooms and prices."
+        path="/hotels"
+        jsonLd={hotelGroupJsonLd()}
+      />
 
       <SiteHeader solid />
-      <main className="min-h-screen bg-surface-lowest pt-20">
+      <main id="main" className="min-h-screen bg-surface-lowest pt-20">
         <section className="border-b border-gold/20 py-14 text-center lg:py-20">
           <Reveal className="mx-auto max-w-3xl px-6 lg:px-margin">
             <span className="text-eyebrow font-semibold uppercase tracking-[0.22em] text-gold-soft">
