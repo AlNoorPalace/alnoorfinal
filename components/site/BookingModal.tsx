@@ -122,7 +122,7 @@ export default function BookingModal() {
     <AnimatePresence>
       {modalOpen && hotel && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-6"
+          className="fixed inset-0 z-[100] flex items-end justify-center lg:items-center lg:p-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -135,14 +135,14 @@ export default function BookingModal() {
             onClick={closeModal}
           />
           <motion.div
-            className="relative flex max-h-[90vh] w-full max-w-5xl overflow-hidden border border-gold/40 bg-surface-lowest shadow-2xl"
+            className="relative flex max-h-[96dvh] w-full max-w-5xl overflow-hidden border border-gold/40 bg-surface-lowest shadow-2xl lg:max-h-[90vh]"
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.98 }}
             transition={{ type: "spring", damping: 26, stiffness: 260 }}
           >
             {/* Summary column */}
-            <aside className="relative hidden w-[300px] shrink-0 flex-col justify-end md:flex">
+            <aside className="relative hidden w-[300px] shrink-0 flex-col justify-end lg:flex">
               <Image
                 src={hotel.image}
                 alt=""
@@ -211,12 +211,28 @@ export default function BookingModal() {
             </aside>
 
             {/* Main column */}
-            <div className="thin-scroll flex-1 overflow-y-auto p-8">
+            <div className="thin-scroll flex-1 overflow-y-auto p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] lg:p-8">
+              {/* Phones: compact trip summary (the side panel is desktop-only) */}
+              <div className="mb-5 mr-12 border-b border-gold/20 pb-4 lg:hidden">
+                <div className="text-eyebrow font-semibold uppercase text-gold">{hotel.city}</div>
+                <div className="font-serif text-[22px] leading-7 text-on-surface">{hotel.name}</div>
+                <div className="mt-1 text-[12px] text-on-surface-variant">
+                  {fmtLong(search.checkIn)} → {fmtLong(search.checkOut)} · {nights} night{nights > 1 ? "s" : ""} · {guests} guest{guests > 1 ? "s" : ""}
+                </div>
+                {pricing && room && (
+                  <div className="mt-2 flex items-baseline justify-between">
+                    <span className="text-[12px] text-on-surface-variant">
+                      {room.name}{corporate ? " · 20% off" : ""}
+                    </span>
+                    <span className="font-serif text-[22px] text-gold-soft">{formatINR(pricing.total)}</span>
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={closeModal}
                 aria-label="Close"
-                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center border border-gold/40 text-gold transition-colors hover:bg-gold/10"
+                className="absolute right-3 top-3 z-10 flex h-9 w-9 lg:right-4 lg:top-4 items-center justify-center border border-gold/40 text-gold transition-colors hover:bg-gold/10"
               >
                 <X size={16} />
               </button>
@@ -254,7 +270,7 @@ export default function BookingModal() {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25 }}
                   >
-                    <h2 className="font-serif text-[34px] leading-10 text-on-surface">
+                    <h2 className="font-serif text-[28px] leading-9 text-on-surface lg:text-[34px] lg:leading-10">
                       Choose your room
                     </h2>
                     <p className="mt-1 text-[14px] text-on-surface-variant">
@@ -322,7 +338,7 @@ export default function BookingModal() {
                       Corporate booking{" "}
                       <span className="text-gold">(20% discount)</span>
                     </label>
-                    <div className="mt-8 flex items-center justify-between">
+                    <div className="mt-8 flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <button
                         type="button"
                         onClick={() => {
@@ -355,15 +371,15 @@ export default function BookingModal() {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.25 }}
                   >
-                    <h2 className="font-serif text-[34px] leading-10 text-on-surface">
+                    <h2 className="font-serif text-[28px] leading-9 text-on-surface lg:text-[34px] lg:leading-10">
                       Your details
                     </h2>
                     <p className="mt-1 text-[14px] text-on-surface-variant">
                       {room?.name} at {hotel.name}. Our team will call to
                       confirm availability.
                     </p>
-                    <div className="mt-6 grid grid-cols-2 gap-4">
-                      <div className="col-span-2">
+                    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="sm:col-span-2">
                         <label className="mb-1.5 block text-eyebrow font-semibold uppercase text-gold" htmlFor="bk-name">
                           Full name *
                         </label>
@@ -408,7 +424,7 @@ export default function BookingModal() {
                         />
                         {errors.email && <p className="mt-1 text-[12px] text-[#ffb4ab]">{errors.email}</p>}
                       </div>
-                      <div className="col-span-2">
+                      <div className="sm:col-span-2">
                         <label className="mb-1.5 block text-eyebrow font-semibold uppercase text-gold" htmlFor="bk-notes">
                           Special requests (optional)
                         </label>

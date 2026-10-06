@@ -44,12 +44,12 @@ export default function HotelsPage() {
 
       <SiteHeader solid />
       <main className="min-h-screen bg-surface-lowest pt-20">
-        <section className="border-b border-gold/20 py-20 text-center">
-          <Reveal className="mx-auto max-w-3xl px-margin">
+        <section className="border-b border-gold/20 py-14 text-center lg:py-20">
+          <Reveal className="mx-auto max-w-3xl px-6 lg:px-margin">
             <span className="text-eyebrow font-semibold uppercase tracking-[0.22em] text-gold-soft">
               Our Locations
             </span>
-            <h1 className="mt-3 font-serif text-display-hero text-on-surface">
+            <h1 className="mt-3 font-serif text-display-hero-m lg:text-display-hero text-on-surface">
               Our Hotels
             </h1>
             <p className="mt-4 text-body-lg font-light text-on-surface-variant">
@@ -58,8 +58,8 @@ export default function HotelsPage() {
           </Reveal>
         </section>
 
-        <section className="bg-ivory py-16 text-[#1B1C19]">
-          <div className="mx-auto max-w-7xl px-margin">
+        <section className="bg-ivory py-10 text-[#1B1C19] lg:py-16">
+          <div className="mx-auto max-w-7xl px-6 lg:px-margin">
             <div className="mb-10 flex flex-wrap items-center gap-3" role="tablist" aria-label="Filter by city">
               {["All", ...CITIES].map((c) => (
                 <button
@@ -86,7 +86,7 @@ export default function HotelsPage() {
                 {list.length} hotel{list.length > 1 ? "s" : ""}
               </span>
             </div>
-            <motion.div layout className="grid grid-cols-4 gap-6">
+            <motion.div layout className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {list.map((h) => (
                 <motion.div
                   key={h.slug}

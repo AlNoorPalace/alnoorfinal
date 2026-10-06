@@ -23,6 +23,8 @@ interface BookingCtx {
   search: SearchState;
   setSearch: (patch: Partial<SearchState>) => void;
   modalOpen: boolean;
+  sheetOpen: boolean;
+  setSheetOpen: (open: boolean) => void;
   preferredRoom: string | null;
   openModal: (opts?: { hotel?: string; room?: string }) => void;
   closeModal: () => void;
@@ -53,6 +55,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [search, setSearchState] = useState<SearchState>(DEFAULT);
   const [modalOpen, setModalOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [preferredRoom, setPreferredRoom] = useState<string | null>(null);
 
   const setSearch = useCallback(
@@ -76,7 +79,12 @@ export function BookingProvider({ children }: { children: ReactNode }) {
           ? document.getElementById("booking-console")
           : null;
       if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        // On phones the search lives in a bottom sheet.
+        if (window.matchMedia("(max-width: 1023px)").matches) {
+          setSheetOpen(true);
+        } else {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       } else {
         router.push(
           hotel ? `/?hotel=${hotel}#booking-console` : "/#booking-console"
@@ -114,13 +122,15 @@ export function BookingProvider({ children }: { children: ReactNode }) {
       search,
       setSearch,
       modalOpen,
+      sheetOpen,
+      setSheetOpen,
       preferredRoom,
       openModal,
       closeModal,
       focusBar,
       reserve,
     }),
-    [search, setSearch, modalOpen, preferredRoom, openModal, closeModal, focusBar, reserve]
+    [search, setSearch, modalOpen, sheetOpen, preferredRoom, openModal, closeModal, focusBar, reserve]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

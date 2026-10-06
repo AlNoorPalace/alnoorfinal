@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   CalendarDays,
@@ -8,7 +9,9 @@ import {
   Minus,
   Plus,
   Search,
+  SlidersHorizontal,
   Users,
+  X,
 } from "lucide-react";
 import {
   CITIES,
@@ -118,7 +121,10 @@ function Stepper({
 }
 
 export default function BookingBar() {
-  const { search, setSearch, openModal } = useBooking();
+  const { search, setSearch, openModal, sheetOpen, setSheetOpen } = useBooking();
+  const [cityFilter, setCityFilter] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [panel, setPanel] = useState<Panel>(null);
   const [error, setError] = useState("");
   const ref = useRef<HTMLDivElement>(null);
@@ -148,6 +154,15 @@ export default function BookingBar() {
     }
   }, [panel]);
 
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [sheetOpen]);
+
   const hotel = getHotel(search.hotel);
   const nights = nightsBetween(search.checkIn, search.checkOut);
   const toggle = (p: Panel) => setPanel((cur) => (cur === p ? null : p));
@@ -170,13 +185,81 @@ export default function BookingBar() {
 
   const guests = search.adults + search.children;
 
+  const closeSheet = () => {
+    setSheetOpen(false);
+    setCityFilter(null);
+    setError("");
+  };
+
+  const submitSheet = () => {
+    if (!hotel) return setError("Please choose a hotel.");
+    if (!search.checkIn || !search.checkOut || nights < 1)
+      return setError("Please select your check-in and check-out dates.");
+    closeSheet();
+    openModal();
+  };
+
+  const summaryTitle = hotel ? hotel.name.replace("Al Noor ", "") : "Choose a hotel";
+  const summarySub = [
+    search.checkIn && search.checkOut
+      ? `${fmtShort(search.checkIn)} – ${fmtShort(search.checkOut)}`
+      : "Add dates",
+    `${guests} guest${guests > 1 ? "s" : ""}`,
+    `${search.rooms} room${search.rooms > 1 ? "s" : ""}`,
+  ].join(" · ");
+
+  const sheetCities = cityFilter ? [cityFilter as (typeof CITIES)[number]] : CITIES;
+
   return (
     <div
       id="booking-console"
       ref={ref}
-      className="relative z-30 mx-auto -mt-16 w-full max-w-6xl px-margin"
+      className="relative z-30 mx-auto -mt-6 w-full max-w-6xl px-6 lg:-mt-16 lg:px-margin"
     >
-      <div className="border border-gold/30 bg-surface-high/95 p-6 shadow-console backdrop-blur-xl">
+      {/* Phones: compact summary card + bottom sheet */}
+      <div className="border border-gold/30 bg-surface-high/95 p-4 shadow-console backdrop-blur-xl lg:hidden">
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          className="flex w-full items-center justify-between gap-3 bg-surface-lowest p-3 text-left active:scale-[0.99]"
+        >
+          <span className="flex min-w-0 items-center gap-3">
+            <MapPin size={22} className="shrink-0 text-gold-soft" />
+            <span className="flex min-w-0 flex-col">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+                Find your stay
+              </span>
+              <span className="truncate font-serif text-[18px] leading-5 text-on-surface">
+                {summaryTitle}
+              </span>
+              <span className="truncate text-[12px] text-on-surface-variant">
+                {summarySub}
+              </span>
+            </span>
+          </span>
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center bg-gold text-ink">
+            <SlidersHorizontal size={18} />
+          </span>
+        </button>
+        <div className="no-scrollbar mt-3 flex items-center gap-2 overflow-x-auto">
+          {CITIES.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => {
+                setCityFilter(c);
+                setSheetOpen(true);
+              }}
+              className="shrink-0 bg-surface px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant active:bg-gold active:text-ink"
+            >
+              {c} ({hotelsByCity(c).length})
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop */}
+      <div className="hidden border border-gold/30 bg-surface-high/95 p-6 shadow-console backdrop-blur-xl lg:block">
         <div className="grid grid-cols-12 items-end gap-4">
           {/* Destination */}
           <div className="relative col-span-3">
@@ -373,6 +456,157 @@ export default function BookingBar() {
           )}
         </AnimatePresence>
       </div>
+
+      {mounted &&
+        createPortal(
+      <AnimatePresence>
+        {sheetOpen && (
+          <motion.div
+            className="fixed inset-0 z-[90] flex flex-col justify-end lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Search stays"
+          >
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={closeSheet} />
+            <motion.div
+              className="relative flex max-h-[92dvh] flex-col bg-surface-low shadow-2xl"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 32, stiffness: 300 }}
+            >
+              <div className="flex items-center justify-between px-5 pb-2 pt-5">
+                <div className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rotate-45 bg-gold-soft" />
+                  <span className="text-eyebrow font-semibold uppercase tracking-[0.2em] text-gold-soft">
+                    Find your stay
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeSheet}
+                  aria-label="Close search"
+                  className="flex h-9 w-9 items-center justify-center text-on-surface-variant hover:text-gold"
+                >
+                  <X size={22} />
+                </button>
+              </div>
+
+              <div className="space-y-6 overflow-y-auto px-5 pb-4">
+                <section>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-eyebrow font-semibold uppercase tracking-[0.16em] text-on-surface-variant">
+                      Select hotel
+                    </span>
+                    {cityFilter && (
+                      <button
+                        type="button"
+                        onClick={() => setCityFilter(null)}
+                        className="text-[11px] text-gold underline-offset-4 hover:underline"
+                      >
+                        Show all cities
+                      </button>
+                    )}
+                  </div>
+                  {sheetCities.map((city) => (
+                    <div key={city} className="mb-3">
+                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+                        {city}
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        {hotelsByCity(city).map((h) => {
+                          const on = search.hotel === h.slug;
+                          return (
+                            <button
+                              key={h.slug}
+                              type="button"
+                              onClick={() => {
+                                setSearch({ hotel: h.slug });
+                                setError("");
+                              }}
+                              className={`flex items-center justify-between p-3 text-left transition-colors ${
+                                on ? "bg-gold text-ink" : "bg-surface-high text-on-surface"
+                              }`}
+                            >
+                              <span>
+                                <span className="block font-serif text-[17px] leading-5">
+                                  {h.name.replace("Al Noor ", "")}
+                                </span>
+                                <span className={`block text-[11px] ${on ? "text-ink/70" : "text-on-surface-variant"}`}>
+                                  {h.rooms.length} room types
+                                </span>
+                              </span>
+                              <span className={`text-[12px] font-semibold ${on ? "text-ink" : "text-gold"}`}>
+                                from {formatINR(minPrice(h))}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </section>
+
+                <section>
+                  <span className="mb-2 block text-eyebrow font-semibold uppercase tracking-[0.16em] text-on-surface-variant">
+                    Dates
+                  </span>
+                  <div className="mb-3 grid grid-cols-2 gap-2">
+                    <div className="bg-surface-high p-3">
+                      <span className="block text-[10px] uppercase tracking-[0.16em] text-on-surface-variant">Check-in</span>
+                      <span className="font-serif text-[17px] text-gold-soft">
+                        {search.checkIn ? fmtShort(search.checkIn) : "Add date"}
+                      </span>
+                    </div>
+                    <div className="bg-surface-high p-3">
+                      <span className="block text-[10px] uppercase tracking-[0.16em] text-on-surface-variant">Check-out</span>
+                      <span className="font-serif text-[17px] text-gold-soft">
+                        {search.checkOut ? fmtShort(search.checkOut) : "Add date"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="bg-surface-high p-4">
+                    <RangeCalendar
+                      checkIn={search.checkIn}
+                      checkOut={search.checkOut}
+                      onChange={(ci, co) => {
+                        setSearch({ checkIn: ci, checkOut: co });
+                        setError("");
+                      }}
+                    />
+                  </div>
+                </section>
+
+                <section className="space-y-4 bg-surface-high p-4">
+                  <Stepper title="Adults" hint="Ages 12 and above" value={search.adults} min={1} max={10} onChange={(n) => setSearch({ adults: n })} />
+                  <Stepper title="Children" hint="Ages 0 to 11" value={search.children} min={0} max={6} onChange={(n) => setSearch({ children: n })} />
+                  <Stepper title="Rooms" hint="Number of rooms" value={search.rooms} min={1} max={6} onChange={(n) => setSearch({ rooms: n })} />
+                </section>
+              </div>
+
+              <div className="border-t border-gold/15 bg-surface-low p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+                {error && (
+                  <p role="alert" className="mb-3 text-[13px] text-[#ffb4ab]">
+                    {error}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={submitSheet}
+                  className="flex h-12 w-full items-center justify-center gap-2 bg-gold-gradient text-eyebrow font-semibold uppercase tracking-[0.18em] text-ink active:opacity-90"
+                >
+                  <Search size={16} /> Search available stays
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>,
+          document.body
+        )}
     </div>
   );
 }
