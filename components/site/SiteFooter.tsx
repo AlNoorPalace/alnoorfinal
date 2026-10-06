@@ -73,7 +73,7 @@ export default function SiteFooter() {
                   return (
                     <li key={h.slug}>
                       <Link
-                        href={`/?hotel=${h.slug}#booking-console`}
+                        href={`/hotels/${h.slug}`}
                         className="transition-colors hover:text-gold-soft"
                       >
                         {short}

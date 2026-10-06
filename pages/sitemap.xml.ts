@@ -1,7 +1,7 @@
 import type { GetServerSideProps } from "next";
-import { SITE_URL } from "../data/hotels";
+import { HOTELS, SITE_URL } from "../data/hotels";
 
-const PATHS = ["/", "/hotels"];
+const PATHS = ["/", "/hotels", ...HOTELS.map((h) => `/hotels/${h.slug}`)];
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
   const urls = PATHS.map(

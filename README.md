@@ -37,6 +37,7 @@ Without `GMAIL_USER` / `GMAIL_PASS` the site still runs, but sending a booking r
 pages/
   index.tsx            Home page
   hotels.tsx           Hotels listing with city filter
+  hotels/[slug].tsx    Hotel detail page (one per branch, statically generated)
   api/send-booking.ts  Emails a booking request to the hotel
   _app.tsx             Global styles, tracking scripts, booking provider + modal
   _document.tsx        Fonts and favicon
@@ -46,8 +47,11 @@ components/site/
   BookingModal.tsx     Room selection, guest details, success
   BookingContext.tsx   Shared search/booking state
   RangeCalendar.tsx    Date-range picker
-  SiteHeader.tsx, SiteFooter.tsx, MobileActionBar.tsx, HotelCard.tsx, motion.tsx, dates.ts
+  HotelBookingPanel.tsx, HotelGallery.tsx, Faq.tsx   Hotel detail page pieces
+  SiteHeader.tsx, SiteFooter.tsx, MobileActionBar.tsx, HotelCard.tsx, Seo.tsx, motion.tsx, dates.ts
 data/hotels.ts         Single source of truth: hotels, rooms, prices, services, reviews, stats, contacts
+data/hotelContent.ts   Detail-page content derived from the data (gallery, FAQs, nearby places)
+data/seo.ts            schema.org JSON-LD builders
 public/img/            Optimized WebP images
 styles/globals.css     Tailwind entry
 tailwind.config.js     Design tokens (gold / black / white palette, fonts, type scale)
@@ -55,7 +59,8 @@ tailwind.config.js     Design tokens (gold / black / white palette, fonts, type 
 
 ## Common edits
 
-- **Add or edit a hotel, room type or price:** `data/hotels.ts`.
+- **Add or edit a hotel, room type or price:** `data/hotels.ts` (a new hotel automatically gets its own `/hotels/<slug>` page and sitemap entry).
+- **Hotel photos:** gallery and room photos are placeholders in `data/hotelContent.ts` (look for `TODO(photo)`).
 - **Replace a hotel photo:** put an optimized image in `public/img/` and update that hotel's `image` in `data/hotels.ts` (look for `TODO(photo)`).
 - **Change phone numbers or email:** `CONTACT` in `data/hotels.ts`.
 - **Colours and type:** `tailwind.config.js`.

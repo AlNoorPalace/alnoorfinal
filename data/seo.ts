@@ -1,4 +1,5 @@
-import { CONTACT, HOTELS, SITE_URL, minPrice } from "./hotels";
+import { CONTACT, HOTELS, Hotel, SITE_URL, minPrice } from "./hotels";
+import { Faq } from "./hotelContent";
 
 export const OG_IMAGE = `${SITE_URL}/img/og-image.jpg`;
 
@@ -29,10 +30,10 @@ export function hotelGroupJsonLd() {
         const prices = h.rooms.map((r) => r.price);
         return {
           "@type": "Hotel",
-          "@id": `${SITE_URL}/hotels#${h.slug}`,
+          "@id": `${SITE_URL}/hotels/${h.slug}`,
           name: h.name,
           description: h.description,
-          url: `${SITE_URL}/hotels?city=${encodeURIComponent(h.city)}`,
+          url: `${SITE_URL}/hotels/${h.slug}`,
           telephone: `+91-${h.phone}`,
           priceRange: `₹${minPrice(h)}–₹${Math.max(...prices)}`,
           address: {
@@ -54,6 +55,60 @@ export function hotelGroupJsonLd() {
           parentOrganization: { "@id": orgId },
         };
       }),
+    ],
+  };
+}
+
+/** schema.org graph for one hotel's detail page. */
+export function hotelPageJsonLd(h: Hotel, faqs: Faq[]) {
+  const url = `${SITE_URL}/hotels/${h.slug}`;
+  const prices = h.rooms.map((r) => r.price);
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Hotel",
+        "@id": url,
+        name: h.name,
+        description: h.description,
+        url,
+        telephone: `+91-${h.phone}`,
+        priceRange: `₹${minPrice(h)}–₹${Math.max(...prices)}`,
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: h.city,
+          addressRegion: h.state,
+          addressCountry: "IN",
+        },
+        geo: { "@type": "GeoCoordinates", latitude: h.lat, longitude: h.lng },
+        amenityFeature: h.amenities.map((a) => ({
+          "@type": "LocationFeatureSpecification",
+          name: a,
+          value: true,
+        })),
+        containsPlace: h.rooms.map((r) => ({
+          "@type": "HotelRoom",
+          name: r.name,
+          occupancy: { "@type": "QuantitativeValue", maxValue: r.maxGuests },
+        })),
+        parentOrganization: { "@id": `${SITE_URL}/#organization` },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Hotels", item: `${SITE_URL}/hotels` },
+          { "@type": "ListItem", position: 3, name: h.name, item: url },
+        ],
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      },
     ],
   };
 }
