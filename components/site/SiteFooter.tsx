@@ -106,6 +106,9 @@ export default function SiteFooter() {
                 <Link href="/hotels" className="block transition-colors hover:text-gold-soft">
                   All hotels
                 </Link>
+                <Link href="/manage-booking" className="block transition-colors hover:text-gold-soft">
+                  Manage your booking
+                </Link>
                 <a
                   href="https://pdfhost.io/v/2q5Tz6vNCD_Privacy_policy"
                   target="_blank"
