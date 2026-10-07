@@ -19,6 +19,11 @@ export interface GalleryPhoto {
 }
 
 export function galleryFor(h: Hotel): GalleryPhoto[] {
+  // Photos uploaded in the admin replace the shared placeholders completely.
+  if (h.images && h.images.length > 0) {
+    const own = [h.image, ...h.images].filter((src, i, all) => all.indexOf(src) === i);
+    return own.map((src, i) => ({ src, alt: i === 0 ? `${h.name} exterior` : `${h.name} photo ${i + 1}` }));
+  }
   return [
     { src: h.image, alt: `${h.name} exterior` },
     ...SHARED_PHOTOS.filter((p) => p.src !== h.image),
@@ -34,6 +39,10 @@ const ROOM_PHOTOS = [
   "/img/room-5.webp",
 ];
 export const roomPhoto = (index: number) => ROOM_PHOTOS[index % ROOM_PHOTOS.length];
+
+/** A room's own uploaded photos, or the shared placeholder when it has none. */
+export const roomPhotos = (images: string[] | undefined, index: number): string[] =>
+  images && images.length > 0 ? images : [roomPhoto(index)];
 
 export interface Faq {
   q: string;

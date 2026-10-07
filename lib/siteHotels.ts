@@ -1,6 +1,6 @@
 import { HOTELS, Hotel, RoomType } from "../data/hotels";
 import { getDb } from "./booking/db";
-import { safeImage } from "./images";
+import { isAllowedImageUrl, safeImage } from "./images";
 
 interface DbRoom {
   name: string;
@@ -8,6 +8,7 @@ interface DbRoom {
   beds: number;
   baths: number;
   maxGuests: number;
+  images?: string[];
 }
 interface DbHotel {
   slug: string;
@@ -20,9 +21,13 @@ interface DbHotel {
   lat: number | null;
   lng: number | null;
   image: string;
+  images?: string[];
   amenities: string[];
   rooms: DbRoom[];
 }
+
+const cleanImages = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((u): u is string => typeof u === "string" && isAllowedImageUrl(u)) : [];
 
 const toHotel = (h: DbHotel): Hotel => ({
   slug: h.slug,
@@ -35,6 +40,7 @@ const toHotel = (h: DbHotel): Hotel => ({
   lat: typeof h.lat === "number" ? h.lat : null,
   lng: typeof h.lng === "number" ? h.lng : null,
   image: safeImage(h.image),
+  images: cleanImages(h.images),
   amenities: Array.isArray(h.amenities) ? h.amenities : [],
   rooms: (h.rooms ?? []).map(
     (r): RoomType => ({
@@ -43,6 +49,7 @@ const toHotel = (h: DbHotel): Hotel => ({
       beds: r.beds,
       baths: r.baths,
       maxGuests: r.maxGuests,
+      images: cleanImages(r.images),
     })
   ),
 });

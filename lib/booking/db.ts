@@ -9,6 +9,8 @@ export interface Db {
   rpc<T = unknown>(fn: string, payload: unknown): Promise<T>;
   /** Stores an image in the public hotel-images bucket and returns its public URL. */
   uploadImage(path: string, bytes: Buffer, contentType: string): Promise<string>;
+  /** Removes a file from the hotel-images bucket. */
+  removeImage(path: string): Promise<void>;
 }
 
 export class DbError extends Error {}
@@ -37,6 +39,10 @@ export function getDb(): Db | null {
         .upload(path, bytes, { contentType, upsert: false, cacheControl: "31536000" });
       if (error) throw new DbError(`upload: ${error.message}`);
       return `${url.replace(/\/$/, "")}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+    },
+    async removeImage(path: string) {
+      const { error } = await client.storage.from(STORAGE_BUCKET).remove([path]);
+      if (error) throw new DbError(`remove: ${error.message}`);
     },
   };
   return cached;

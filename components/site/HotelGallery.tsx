@@ -4,6 +4,14 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
 import { GalleryPhoto } from "../../data/hotelContent";
 
+/** Tile sizes that still look right with only a few photos (uploaded galleries can be any size). */
+function layout(i: number, n: number): string {
+  if (n === 1) return "col-span-2 h-56 lg:col-span-4 lg:row-span-2 lg:h-auto";
+  if (n === 2) return "col-span-2 h-40 lg:row-span-2 lg:h-auto";
+  if (n === 3) return i === 0 ? "col-span-2 h-56 lg:row-span-2 lg:h-auto" : "col-span-1 h-28 lg:col-span-2 lg:h-auto";
+  return i === 0 ? "col-span-2 h-56 lg:row-span-2 lg:h-auto" : "h-28 lg:h-auto";
+}
+
 export default function HotelGallery({
   photos,
   name,
@@ -46,11 +54,7 @@ export default function HotelGallery({
             type="button"
             onClick={() => setOpen(i)}
             aria-label={`Open photo: ${p.alt}`}
-            className={`${tile} ${
-              i === 0
-                ? "col-span-2 h-56 lg:row-span-2 lg:h-auto"
-                : "h-28 lg:h-auto"
-            }`}
+            className={`${tile} ${layout(i, photos.length)}`}
           >
             <Image
               src={p.src}

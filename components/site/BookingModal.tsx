@@ -26,6 +26,8 @@ interface Option {
   maxGuests: number;
   beds: number;
   baths: number;
+  /** First photo of the room, if the admin uploaded any. */
+  photo?: string;
   /** null when availability is unknown (request mode) */
   available: number | null;
   fits: boolean;
@@ -77,6 +79,7 @@ export default function BookingModal() {
           maxGuests: r.maxGuests,
           beds: r.beds,
           baths: r.baths,
+          photo: r.images?.[0],
           available,
           fits: guests <= r.maxGuests * search.rooms,
         }));
@@ -107,6 +110,7 @@ export default function BookingModal() {
               maxGuests: r.maxGuests,
               beds: meta?.beds ?? 1,
               baths: meta?.baths ?? 1,
+              photo: meta?.images?.[0],
               available: r.available,
               fits: r.fitsParty,
             };
@@ -438,7 +442,12 @@ export default function BookingModal() {
                                     : "border-outline-variant/40 hover:border-gold/60"
                                 }`}
                               >
-                                <span>
+                                {r.photo && (
+                                  <span className="relative hidden h-16 w-24 shrink-0 overflow-hidden sm:block">
+                                    <Image src={r.photo} alt="" fill sizes="96px" className="object-cover" />
+                                  </span>
+                                )}
+                                <span className="min-w-0 flex-1">
                                   <span className="block font-serif text-[22px] text-on-surface">{r.name}</span>
                                   <span className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-on-surface-variant">
                                     <span className="flex items-center gap-1.5"><BedDouble size={14} className="text-gold" />{r.beds} bed{r.beds > 1 ? "s" : ""}</span>
