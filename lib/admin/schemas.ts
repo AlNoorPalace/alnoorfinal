@@ -62,6 +62,7 @@ export const roomSave = z
     baths: z.number().int().min(1).max(20).optional(),
     active: z.boolean().optional(),
     images: photoList(8).optional(),
+    description: z.string().trim().max(600, "At most 600 characters").optional(),
   })
   .superRefine((v, ctx) => {
     if (!v.id) {

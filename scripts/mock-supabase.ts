@@ -19,6 +19,7 @@ const MIGRATIONS = [
   "supabase/migrations/20260101000000_booking_engine.sql",
   "supabase/migrations/20260102000000_hotel_management.sql",
   "supabase/migrations/20260103000000_photos.sql",
+  "supabase/migrations/20260104000000_room_descriptions.sql",
 ];
 
 const PUBLIC_FUNCTIONS = new Set([
