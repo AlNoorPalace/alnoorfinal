@@ -27,8 +27,8 @@ async function main() {
   )).rows[0].n;
   if (!hasTables) {
     await db.exec(readFileSync("supabase/migrations/20260101000000_booking_engine.sql", "utf8"));
-    await db.exec(readFileSync("supabase/seed.sql", "utf8"));
-    if (ROOMS) await db.exec(`update public.room_types set total_rooms = ${Number(ROOMS)}`);
+    if (!process.env.MOCK_SKIP_SEED) await db.exec(readFileSync("supabase/seed.sql", "utf8"));
+    if (ROOMS && !process.env.MOCK_SKIP_SEED) await db.exec(`update public.room_types set total_rooms = ${Number(ROOMS)}`);
   }
 
   createServer(async (req, res) => {

@@ -457,15 +457,22 @@ export default function BookingModal() {
                             );
                           })}
                         </div>
-                        {options.every((o) => o.available === 0) && engine && (
+                        {engine && options.length === 0 && (
+                          <p role="status" className="mt-4 border border-gold/30 p-4 text-[14px] text-on-surface-variant">
+                            Online booking isn&apos;t available for this hotel right now. Please call us on {phoneLabel} and we&apos;ll book your room.
+                          </p>
+                        )}
+                        {engine && options.length > 0 && options.every((o) => o.available === 0) && (
                           <p className="mt-4 text-[14px] text-on-surface-variant">
                             Everything is booked for these dates. Try different dates or call us on {phoneLabel}.
                           </p>
                         )}
-                        <label className="mt-5 flex cursor-pointer items-center gap-3 text-[14px] text-on-surface-variant">
-                          <input type="checkbox" checked={corporate} onChange={(e) => setCorporate(e.target.checked)} className="h-4 w-4 accent-[#C9A24B]" />
-                          Corporate booking <span className="text-gold">(20% discount)</span>
-                        </label>
+                        {options.length > 0 && (
+                          <label className="mt-5 flex cursor-pointer items-center gap-3 text-[14px] text-on-surface-variant">
+                            <input type="checkbox" checked={corporate} onChange={(e) => setCorporate(e.target.checked)} className="h-4 w-4 accent-[#C9A24B]" />
+                            Corporate booking <span className="text-gold">(20% discount)</span>
+                          </label>
+                        )}
                       </>
                     )}
 
