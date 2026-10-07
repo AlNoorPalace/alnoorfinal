@@ -6,13 +6,16 @@ import SiteHeader from "../components/site/SiteHeader";
 import SiteFooter from "../components/site/SiteFooter";
 import HotelCard, { HelpCard } from "../components/site/HotelCard";
 import { Reveal } from "../components/site/motion";
-import { CITIES, HOTELS } from "../data/hotels";
+import type { GetStaticProps } from "next";
+import { Hotel, citiesOf, joinList } from "../data/hotels";
+import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../lib/siteHotels";
 
-export default function HotelsPage() {
+export default function HotelsPage({ hotels }: { hotels: Hotel[] }) {
   const router = useRouter();
+  const cities = citiesOf(hotels);
   const q = router.query.city;
-  const city = typeof q === "string" && CITIES.includes(q as never) ? q : "All";
-  const list = city === "All" ? HOTELS : HOTELS.filter((h) => h.city === city);
+  const city = typeof q === "string" && cities.includes(q) ? q : "All";
+  const list = city === "All" ? hotels : hotels.filter((h) => h.city === city);
 
   const setCity = (c: string) =>
     router.replace(
@@ -25,9 +28,9 @@ export default function HotelsPage() {
     <>
       <Seo
         title="Our Hotels | Al Noor Group of Hotels"
-        description="Explore Al Noor hotels in Triplicane, Parrys and Koyambedu (Chennai), Electronic City and Koramangala (Bengaluru), Hyderabad and Ooty. See rooms and prices."
+        description={`Explore Al Noor hotels${cities.length ? ` in ${joinList(cities)}` : ""}. See rooms and prices, and book direct.`}
         path="/hotels"
-        jsonLd={hotelGroupJsonLd()}
+        jsonLd={hotelGroupJsonLd(hotels)}
       />
 
       <SiteHeader solid />
@@ -41,7 +44,7 @@ export default function HotelsPage() {
               Our Hotels
             </h1>
             <p className="mt-4 text-body-lg font-light text-on-surface-variant">
-              Seven hotels across Chennai, Bengaluru, Hyderabad and Ooty.
+              {hotels.length} hotel{hotels.length === 1 ? "" : "s"}{cities.length > 0 && <> across {joinList(cities)}</>}.
             </p>
           </Reveal>
         </section>
@@ -49,7 +52,7 @@ export default function HotelsPage() {
         <section className="bg-ivory py-10 text-[#1B1C19] lg:py-16">
           <div className="mx-auto max-w-7xl px-6 lg:px-margin">
             <div className="mb-10 flex flex-wrap items-center gap-3" role="tablist" aria-label="Filter by city">
-              {["All", ...CITIES].map((c) => (
+              {["All", ...cities].map((c) => (
                 <button
                   key={c}
                   type="button"
@@ -74,6 +77,11 @@ export default function HotelsPage() {
                 {list.length} hotel{list.length > 1 ? "s" : ""}
               </span>
             </div>
+            {list.length === 0 && (
+              <p className="py-10 text-center text-body-md text-[#474744]">
+                Our hotels will be listed here soon.
+              </p>
+            )}
             <motion.div layout className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {list.map((h) => (
                 <motion.div
@@ -102,3 +110,8 @@ export default function HotelsPage() {
     </>
   );
 }
+
+export const getStaticProps: GetStaticProps<{ hotels: Hotel[] }> = async () => ({
+  props: { hotels: await getSiteHotels() },
+  revalidate: SITE_REVALIDATE_SECONDS,
+});

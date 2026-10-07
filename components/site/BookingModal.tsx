@@ -11,7 +11,8 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { CONTACT, formatINR, getHotel } from "../../data/hotels";
+import { CONTACT, findHotel, formatINR } from "../../data/hotels";
+import { useHotels } from "./HotelsContext";
 import { useBooking } from "./BookingContext";
 import { fmtLong, nightsBetween } from "./dates";
 
@@ -48,7 +49,8 @@ const errorText = (code: string, phone: string) =>
 
 export default function BookingModal() {
   const { modalOpen, closeModal, search, preferredRoom, focusBar } = useBooking();
-  const hotel = getHotel(search.hotel);
+  const hotels = useHotels();
+  const hotel = findHotel(hotels, search.hotel);
   const nights = nightsBetween(search.checkIn, search.checkOut);
   const guests = search.adults + search.children;
   const phoneLabel = CONTACT.phones[0].label;
@@ -234,7 +236,7 @@ export default function BookingModal() {
           name: form.name.trim(),
           phone: form.phone.trim(),
           email: form.email.trim(),
-          branch: hotel.branch,
+          branch: hotel.name,
           checkin: search.checkIn,
           checkout: search.checkOut,
           days: nights,

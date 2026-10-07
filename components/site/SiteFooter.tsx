@@ -2,7 +2,8 @@ import { ReactNode, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Mail, Phone } from "lucide-react";
-import { CONTACT, HOTELS } from "../../data/hotels";
+import { CONTACT, citiesOf, joinList } from "../../data/hotels";
+import { useHotels } from "./HotelsContext";
 
 /** Collapsible on phones, always open (and not toggleable) from lg up. */
 function FooterSection({
@@ -43,6 +44,8 @@ function FooterSection({
 }
 
 export default function SiteFooter() {
+  const hotels = useHotels();
+  const cities = citiesOf(hotels);
   return (
     <footer id="contact" className="border-t border-gold/20 bg-ink pb-28 pt-12 lg:py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-margin">
@@ -61,14 +64,14 @@ export default function SiteFooter() {
             </div>
             <p className="max-w-md text-body-md font-light text-on-surface-variant">
               Comfortable, well-appointed rooms for business and leisure
-              travellers across Chennai, Bengaluru, Hyderabad and Ooty.
+              travellers{cities.length > 0 && <> across {joinList(cities)}</>}.
             </p>
           </div>
 
           <div className="divide-y divide-gold/15 border-y border-gold/15 lg:col-span-7 lg:grid lg:grid-cols-7 lg:gap-gutter lg:divide-y-0 lg:border-0">
             <FooterSection title="Our Hotels" className="lg:col-span-3">
               <ul className="space-y-2 text-body-sm text-on-surface-variant">
-                {HOTELS.map((h) => {
+                {hotels.map((h) => {
                   const short = h.name.replace("Al Noor ", "");
                   return (
                     <li key={h.slug}>

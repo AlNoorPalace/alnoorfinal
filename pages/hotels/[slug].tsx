@@ -29,15 +29,16 @@ import Faq from "../../components/site/Faq";
 import { useBooking } from "../../components/site/BookingContext";
 import { EASE, Reveal, Stagger, StaggerItem } from "../../components/site/motion";
 import {
-  HOTELS,
   ROOM_AMENITIES,
   SITE_URL,
   formatINR,
-  getHotel,
+  Hotel,
+  hotelPhone,
   minPrice,
 } from "../../data/hotels";
 import { NEARBY, faqsFor, galleryFor, roomPhoto } from "../../data/hotelContent";
 import { hotelPageJsonLd } from "../../data/seo";
+import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../../lib/siteHotels";
 
 const AMENITY_ICONS: Record<string, typeof Wifi> = {
   "Wi-Fi": Wifi,
@@ -74,26 +75,28 @@ function Section({
   );
 }
 
-export default function HotelPage({ slug }: { slug: string }) {
-  const hotel = getHotel(slug)!;
+export default function HotelPage({ hotel, hotels }: { hotel: Hotel; hotels: Hotel[] }) {
   const { reserve, focusBar } = useBooking();
   const faqs = faqsFor(hotel);
   const photos = galleryFor(hotel);
   const nearby = NEARBY[hotel.slug];
 
   const related = [
-    ...HOTELS.filter((h) => h.slug !== hotel.slug && h.city === hotel.city),
-    ...HOTELS.filter((h) => h.slug !== hotel.slug && h.city !== hotel.city),
+    ...hotels.filter((h) => h.slug !== hotel.slug && h.city === hotel.city),
+    ...hotels.filter((h) => h.slug !== hotel.slug && h.city !== hotel.city),
   ].slice(0, 3);
 
+  const hasMap = hotel.lat !== null && hotel.lng !== null;
+  const place = [hotel.city, hotel.state].filter(Boolean).join(", ");
+  const phone = hotelPhone(hotel);
   const mapSrc = `https://maps.google.com/maps?q=${hotel.lat},${hotel.lng}&z=15&output=embed`;
   const mapsLink = `https://www.google.com/maps/search/?api=1&query=${hotel.lat},${hotel.lng}`;
   const directions = `https://www.google.com/maps/dir/?api=1&destination=${hotel.lat},${hotel.lng}`;
 
+  const rawDescription =
+    hotel.description || `${hotel.name} in ${place}. Rooms, prices and booking at Al Noor Group of Hotels.`;
   const description =
-    hotel.description.length > 158
-      ? `${hotel.description.slice(0, 155).trimEnd()}…`
-      : hotel.description;
+    rawDescription.length > 158 ? `${rawDescription.slice(0, 155).trimEnd()}…` : rawDescription;
 
   return (
     <>
@@ -140,7 +143,7 @@ export default function HotelPage({ slug }: { slug: string }) {
               transition={{ duration: 0.9, ease: EASE, delay: 0.15 }}
             >
               <div className="mb-3 inline-flex items-center gap-2 text-eyebrow font-semibold uppercase tracking-[0.22em] text-gold-soft">
-                <MapPin size={14} /> {hotel.city}, {hotel.state}
+                <MapPin size={14} /> {place}
               </div>
               <h1 className="font-serif text-[40px] leading-[48px] text-on-surface lg:text-[64px] lg:leading-[72px]">
                 {hotel.name}
@@ -154,10 +157,10 @@ export default function HotelPage({ slug }: { slug: string }) {
                   onClick={() => focusBar(hotel.slug)}
                   className="bg-gold-gradient px-10 py-4 text-eyebrow font-semibold uppercase tracking-[0.16em] text-ink transition-shadow hover:shadow-gold"
                 >
-                  Book from {formatINR(minPrice(hotel))}
+                  {minPrice(hotel) !== null ? `Book from ${formatINR(minPrice(hotel)!)}` : "Book your stay"}
                 </button>
                 <a
-                  href={`tel:+91${hotel.phone}`}
+                  href={`tel:+91${phone}`}
                   className="flex items-center justify-center gap-2 border border-gold/50 bg-black/30 px-10 py-4 text-eyebrow font-semibold uppercase tracking-[0.16em] text-on-surface backdrop-blur-sm transition-colors hover:bg-gold/10"
                 >
                   <Phone size={14} className="text-gold" /> Call
@@ -177,11 +180,13 @@ export default function HotelPage({ slug }: { slug: string }) {
 
           <div className="min-w-0 space-y-16 lg:space-y-20">
             <Section id="overview" eyebrow="Overview" title={`Stay at ${hotel.name}`}>
-              <Reveal>
-                <p className="text-body-lg font-light text-on-surface-variant">
-                  {hotel.description}
-                </p>
-              </Reveal>
+              {hotel.description && (
+                <Reveal>
+                  <p className="text-body-lg font-light text-on-surface-variant">
+                    {hotel.description}
+                  </p>
+                </Reveal>
+              )}
               {nearby && (
                 <Reveal className="mt-6">
                   <div className="text-eyebrow font-semibold uppercase tracking-[0.2em] text-gold">
@@ -205,6 +210,11 @@ export default function HotelPage({ slug }: { slug: string }) {
             </Section>
 
             <Section id="rooms" eyebrow="Rooms" title="Choose your room">
+              {hotel.rooms.length === 0 && (
+                <p className="border border-gold/30 p-5 text-body-md text-on-surface-variant">
+                  Rooms for this hotel will be listed soon. Please call us on +91 {phone.slice(0, 5)} {phone.slice(5)} to book.
+                </p>
+              )}
               <Stagger className="space-y-4" gap={0.1}>
                 {hotel.rooms.map((r, i) => (
                   <StaggerItem key={r.name}>
@@ -271,7 +281,8 @@ export default function HotelPage({ slug }: { slug: string }) {
               </Reveal>
             </Section>
 
-            <Section id="location" eyebrow="Location" title={`${hotel.city}, ${hotel.state}`}>
+            <Section id="location" eyebrow="Location" title={place}>
+              {hasMap ? (
               <Reveal>
                 <div className="overflow-hidden border border-gold/30">
                   <iframe
@@ -304,6 +315,13 @@ export default function HotelPage({ slug }: { slug: string }) {
                   Map shows the approximate hotel location.
                 </p>
               </Reveal>
+              ) : (
+                <Reveal>
+                  <p className="text-body-md font-light text-on-surface-variant">
+                    Call us on +91 {phone.slice(0, 5)} {phone.slice(5)} for directions to {hotel.name}.
+                  </p>
+                </Reveal>
+              )}
             </Section>
 
             <Section id="faq" eyebrow="FAQ" title="Good to know">
@@ -352,12 +370,14 @@ export default function HotelPage({ slug }: { slug: string }) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => ({
-  paths: HOTELS.map((h) => ({ params: { slug: h.slug } })),
-  fallback: false,
+  paths: (await getSiteHotels()).map((h) => ({ params: { slug: h.slug } })),
+  // Hotels added in the admin get their page on first visit.
+  fallback: "blocking",
 });
 
-export const getStaticProps: GetStaticProps<{ slug: string }> = async ({ params }) => {
-  const slug = String(params?.slug ?? "");
-  if (!getHotel(slug)) return { notFound: true };
-  return { props: { slug } };
+export const getStaticProps: GetStaticProps<{ hotel: Hotel; hotels: Hotel[] }> = async ({ params }) => {
+  const hotels = await getSiteHotels();
+  const hotel = hotels.find((h) => h.slug === String(params?.slug ?? ""));
+  if (!hotel) return { notFound: true, revalidate: 60 };
+  return { props: { hotel, hotels }, revalidate: SITE_REVALIDATE_SECONDS };
 };

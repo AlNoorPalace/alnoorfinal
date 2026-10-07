@@ -1,4 +1,7 @@
 import Link from "next/link";
+import type { GetStaticProps } from "next";
+import { Hotel } from "../data/hotels";
+import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../lib/siteHotels";
 import Seo from "../components/site/Seo";
 import SiteHeader from "../components/site/SiteHeader";
 import SiteFooter from "../components/site/SiteFooter";
@@ -45,3 +48,8 @@ export default function NotFound() {
     </>
   );
 }
+
+export const getStaticProps: GetStaticProps<{ hotels: Hotel[] }> = async () => ({
+  props: { hotels: await getSiteHotels() },
+  revalidate: SITE_REVALIDATE_SECONDS,
+});

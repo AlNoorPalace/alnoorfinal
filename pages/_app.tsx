@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app';
 import Script from 'next/script';
 import Head from 'next/head';
 import { BookingProvider } from '../components/site/BookingContext';
+import { HotelsProvider } from '../components/site/HotelsContext';
 import BookingModal from '../components/site/BookingModal';
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -67,10 +68,12 @@ function MyApp({ Component, pageProps }: AppProps) {
         Skip to content
       </a>
 
-      <BookingProvider>
-        <Component {...pageProps} />
-        <BookingModal />
-      </BookingProvider>
+      <HotelsProvider hotels={pageProps.hotels}>
+        <BookingProvider>
+          <Component {...pageProps} />
+          <BookingModal />
+        </BookingProvider>
+      </HotelsProvider>
     </>
   );
 }

@@ -33,11 +33,11 @@ test("dates: past, inverted, too long, too far ahead, malformed", () => {
   assert.equal(bad({ checkIn: todayIST(), checkOut: addDays(todayIST(), 1) }).success, true, "today is allowed");
 });
 
-test("hotel and room type must exist together", () => {
-  assert.ok(fieldsOf(bad({ hotel: "mars" })).includes("hotel"));
-  assert.deepEqual(fieldsOf(bad({ roomType: "Penthouse" })), ["roomType"]);
-  assert.deepEqual(fieldsOf(bad({ hotel: "parrys", roomType: "Suite" })), ["roomType"], "Suite is not a Parrys room");
-  assert.equal(bad({ hotel: "parrys", roomType: "Standard" }).success, true);
+test("hotel slug must be well-formed; whether it exists is decided by the database", () => {
+  assert.deepEqual(fieldsOf(bad({ hotel: "Mars!" })), ["hotel"]);
+  assert.deepEqual(fieldsOf(bad({ hotel: "x".repeat(41) })), ["hotel"]);
+  assert.equal(bad({ hotel: "some-new-hotel", roomType: "Any Room Name" }).success, true);
+  assert.deepEqual(fieldsOf(bad({ roomType: "" })), ["roomType"]);
 });
 
 test("guest counts, name, email and honeypot", () => {

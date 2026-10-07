@@ -5,11 +5,14 @@ import { CalendarDays, Phone, Search } from "lucide-react";
 import Seo from "../components/site/Seo";
 import SiteHeader from "../components/site/SiteHeader";
 import SiteFooter from "../components/site/SiteFooter";
-import { CONTACT, formatINR, getHotel } from "../data/hotels";
+import type { GetStaticProps } from "next";
+import { CONTACT, Hotel, formatINR } from "../data/hotels";
+import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../lib/siteHotels";
 
 interface FoundBooking {
   reference: string;
   hotel: string;
+  hotel_name: string | null;
   room_type: string;
   check_in: string;
   check_out: string;
@@ -94,7 +97,6 @@ export default function ManageBooking() {
     }
   };
 
-  const hotel = booking ? getHotel(booking.hotel) : null;
   const input =
     "w-full border border-outline-variant/40 bg-surface px-3 py-3 text-[15px] text-on-surface outline-none placeholder:text-on-surface-variant/50 focus:border-gold";
   const label = "mb-1.5 block text-eyebrow font-semibold uppercase text-gold";
@@ -159,7 +161,7 @@ export default function ManageBooking() {
                 </div>
                 <dl className="space-y-3 p-5 text-[14px]">
                   {[
-                    ["Hotel", hotel ? `${hotel.name}, ${hotel.city}` : booking.hotel],
+                    ["Hotel", booking.hotel_name ?? booking.hotel],
                     ["Room", `${booking.room_type} × ${booking.rooms}`],
                     ["Check-in", fmt(booking.check_in)],
                     ["Check-out", fmt(booking.check_out)],
@@ -180,7 +182,7 @@ export default function ManageBooking() {
                   {booking.status === "cancelled" ? (
                     <p className="text-[14px] text-on-surface-variant">
                       This booking has been cancelled.{" "}
-                      <Link href={hotel ? `/hotels/${hotel.slug}` : "/hotels"} className="text-gold-soft underline underline-offset-4">
+                      <Link href={booking ? `/hotels/${booking.hotel}` : "/hotels"} className="text-gold-soft underline underline-offset-4">
                         Book again
                       </Link>
                     </p>
@@ -216,3 +218,8 @@ export default function ManageBooking() {
     </>
   );
 }
+
+export const getStaticProps: GetStaticProps<{ hotels: Hotel[] }> = async () => ({
+  props: { hotels: await getSiteHotels() },
+  revalidate: SITE_REVALIDATE_SECONDS,
+});

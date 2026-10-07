@@ -8,7 +8,8 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/router";
-import { getHotel } from "../../data/hotels";
+import { findHotel } from "../../data/hotels";
+import { useHotels } from "./HotelsContext";
 
 export interface SearchState {
   hotel: string; // hotel slug, "" when unset
@@ -53,6 +54,7 @@ export const useBooking = () => {
 
 export function BookingProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const hotels = useHotels();
   const [search, setSearchState] = useState<SearchState>(DEFAULT);
   const [modalOpen, setModalOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -68,8 +70,8 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!router.isReady) return;
     const q = router.query.hotel;
-    if (typeof q === "string" && getHotel(q)) setSearch({ hotel: q });
-  }, [router.isReady, router.query.hotel, setSearch]);
+    if (typeof q === "string" && findHotel(hotels, q)) setSearch({ hotel: q });
+  }, [router.isReady, router.query.hotel, setSearch, hotels]);
 
   const focusBar = useCallback(
     (hotel?: string) => {

@@ -14,13 +14,13 @@ import {
   X,
 } from "lucide-react";
 import {
-  CITIES,
-  HOTELS,
+  citiesOf,
+  findHotel,
   formatINR,
-  getHotel,
-  hotelsByCity,
+  hotelsInCity,
   minPrice,
 } from "../../data/hotels";
+import { useHotels } from "./HotelsContext";
 import { useBooking } from "./BookingContext";
 import RangeCalendar from "./RangeCalendar";
 import { fmtShort, nightsBetween } from "./dates";
@@ -163,7 +163,9 @@ export default function BookingBar() {
     };
   }, [sheetOpen]);
 
-  const hotel = getHotel(search.hotel);
+  const hotels = useHotels();
+  const cities = citiesOf(hotels);
+  const hotel = findHotel(hotels, search.hotel);
   const nights = nightsBetween(search.checkIn, search.checkOut);
   const toggle = (p: Panel) => setPanel((cur) => (cur === p ? null : p));
 
@@ -208,7 +210,7 @@ export default function BookingBar() {
     `${search.rooms} room${search.rooms > 1 ? "s" : ""}`,
   ].join(" · ");
 
-  const sheetCities = cityFilter ? [cityFilter as (typeof CITIES)[number]] : CITIES;
+  const sheetCities = cityFilter ? [cityFilter] : cities;
 
   return (
     <div
@@ -242,7 +244,7 @@ export default function BookingBar() {
           </span>
         </button>
         <div className="no-scrollbar mt-3 flex items-center gap-2 overflow-x-auto">
-          {CITIES.map((c) => (
+          {cities.map((c) => (
             <button
               key={c}
               type="button"
@@ -252,7 +254,7 @@ export default function BookingBar() {
               }}
               className="shrink-0 bg-surface px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant active:bg-gold active:text-ink"
             >
-              {c} ({hotelsByCity(c).length})
+              {c} ({hotelsInCity(hotels, c).length})
             </button>
           ))}
         </div>
@@ -278,12 +280,12 @@ export default function BookingBar() {
                   {...pop}
                   className="thin-scroll absolute left-0 top-full z-50 mt-2 max-h-[420px] w-[360px] overflow-y-auto border border-gold/40 bg-surface-highest p-3 shadow-2xl"
                 >
-                  {CITIES.map((city) => (
+                  {cities.map((city) => (
                     <div key={city} className="mb-2 last:mb-0">
                       <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
                         {city}
                       </div>
-                      {hotelsByCity(city).map((h) => (
+                      {hotelsInCity(hotels, city).map((h) => (
                         <button
                           key={h.slug}
                           type="button"
@@ -313,13 +315,15 @@ export default function BookingBar() {
                               {h.tagline}
                             </span>
                           </span>
-                          <span className="shrink-0 text-right text-[11px] text-gold">
-                            from
-                            <br />
-                            <span className="text-[13px] font-semibold">
-                              {formatINR(minPrice(h))}
+                          {minPrice(h) !== null && (
+                            <span className="shrink-0 text-right text-[11px] text-gold">
+                              from
+                              <br />
+                              <span className="text-[13px] font-semibold">
+                                {formatINR(minPrice(h)!)}
+                              </span>
                             </span>
-                          </span>
+                          )}
                         </button>
                       ))}
                     </div>
@@ -517,7 +521,7 @@ export default function BookingBar() {
                         {city}
                       </div>
                       <div className="grid grid-cols-1 gap-2">
-                        {hotelsByCity(city).map((h) => {
+                        {hotelsInCity(hotels, city).map((h) => {
                           const on = search.hotel === h.slug;
                           return (
                             <button
@@ -539,9 +543,11 @@ export default function BookingBar() {
                                   {h.rooms.length} room types
                                 </span>
                               </span>
-                              <span className={`text-[12px] font-semibold ${on ? "text-ink" : "text-gold"}`}>
-                                from {formatINR(minPrice(h))}
-                              </span>
+                              {minPrice(h) !== null && (
+                                <span className={`text-[12px] font-semibold ${on ? "text-ink" : "text-gold"}`}>
+                                  from {formatINR(minPrice(h)!)}
+                                </span>
+                              )}
                             </button>
                           );
                         })}
