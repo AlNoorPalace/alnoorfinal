@@ -6,7 +6,7 @@ Built with Next.js (Pages Router), React 18, TypeScript, Tailwind CSS and Framer
 
 ## Getting started
 
-```bash
+```bash 
 npm install
 cp .env.example .env.local   # then fill in the values
 npm run dev                  # http://localhost:3000
