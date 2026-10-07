@@ -28,18 +28,20 @@ import {
   Zap,
 } from "lucide-react";
 import {
-  CITY_TILES,
+  CITY_EYEBROW,
   CONTACT,
   CORPORATE_PERKS,
   FEATURED_ROOMS,
-  HOTELS,
   REVIEWS,
   SERVICES,
   STATS,
   formatINR,
-  hotelsByCity,
+  citiesOf,
+  hotelsInCity,
+  joinList,
 } from "../../data/hotels";
 import { useBooking } from "./BookingContext";
+import { useHotels } from "./HotelsContext";
 import HotelCard, { HelpCard } from "./HotelCard";
 import {
   CountUp,
@@ -97,6 +99,7 @@ export function Hero() {
   const y = useTransform(scrollYProgress, [0, 1], ["0%", reduce ? "0%" : "18%"]);
 
   const words = ["Rest", "Well.", "Work", "Better."];
+  const cities = citiesOf(useHotels());
 
   return (
     <section
@@ -157,8 +160,8 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.85 }}
           className="mb-8 max-w-sm text-body-md font-light text-on-surface-variant lg:mb-10 lg:max-w-2xl lg:text-body-lg"
         >
-          Rooms redefined for business and leisure travellers, across Chennai,
-          Bengaluru, Hyderabad and the hills of Ooty.
+          Rooms redefined for business and leisure travellers
+          {cities.length > 0 && <>, across {joinList(cities)}</>}.
         </motion.p>
 
         <motion.div
@@ -226,6 +229,14 @@ export function TrustStrip() {
 /* ------------------------------------------------------------------ */
 
 export function Destinations() {
+  const hotels = useHotels();
+  const cities = citiesOf(hotels);
+  if (cities.length === 0) return null;
+  const tiles = cities.map((city) => ({
+    city,
+    image: hotelsInCity(hotels, city)[0].image,
+    eyebrow: CITY_EYEBROW[city] ?? "",
+  }));
   return (
     <section className="bg-surface-lowest py-16 lg:py-28">
       <div className="mx-auto max-w-7xl px-6 lg:px-margin">
@@ -238,18 +249,19 @@ export function Destinations() {
           </Reveal>
           <Reveal delay={0.1} className="max-w-md">
             <p className="text-body-md font-light text-on-surface-variant">
-              Seven hotels in four cities, from the Chennai coast to the tech
-              corridors of Bengaluru, the city of Hyderabad and the Nilgiri hills.
+              {hotels.length} hotel{hotels.length === 1 ? "" : "s"} in {cities.length}{" "}
+              {cities.length === 1 ? "city" : "cities"}: {joinList(cities)}. Choose a city to see
+              its Al Noor hotels.
             </p>
           </Reveal>
         </div>
         <Stagger className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-gutter lg:overflow-visible lg:px-0" gap={0.12}>
-          {CITY_TILES.map((t) => {
-            const count = hotelsByCity(t.city).length;
+          {tiles.map((t) => {
+            const count = hotelsInCity(hotels, t.city).length;
             return (
               <StaggerItem key={t.city} className="w-[270px] shrink-0 snap-center lg:w-auto">
                 <Link
-                  href={`/hotels?city=${t.city}`}
+                  href={`/hotels?city=${encodeURIComponent(t.city)}`}
                   className="group relative block h-[360px] overflow-hidden border border-gold/20 lg:h-[480px]"
                 >
                   <Image
@@ -290,13 +302,15 @@ export function Destinations() {
 /* ------------------------------------------------------------------ */
 
 export function HotelsSection() {
+  const hotels = useHotels();
+  const cities = citiesOf(hotels);
   return (
     <section id="hotels" className="scroll-mt-20 border-y border-gold/20 bg-ivory py-16 lg:py-28 text-[#1B1C19]">
       <div className="mx-auto max-w-7xl px-6 lg:px-margin">
         <Reveal className="mx-auto mb-10 max-w-3xl lg:mb-14 text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/10 px-4 py-1.5">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold-deep" />
-            <Eyebrow light>75+ rooms across 7 hotels</Eyebrow>
+            <Eyebrow light>{hotels.length} hotel{hotels.length === 1 ? "" : "s"} · {cities.length} {cities.length === 1 ? "city" : "cities"}</Eyebrow>
           </div>
           <h2 className="font-serif text-headline-lg-m lg:text-headline-lg">
             Distinctive Hotels Across South India
@@ -307,7 +321,7 @@ export function HotelsSection() {
           </p>
         </Reveal>
         <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4" gap={0.08}>
-          {HOTELS.map((h) => (
+          {hotels.map((h) => (
             <StaggerItem key={h.slug} className="flex">
               <div className="flex w-full">
                 <HotelCard hotel={h} />
@@ -578,6 +592,8 @@ export function Corporate() {
 /* ------------------------------------------------------------------ */
 
 export function StatsRow() {
+  const hotelCount = useHotels().length;
+  const stats = STATS.map((s) => (s.label === "Hotels" ? { ...s, value: hotelCount } : s));
   return (
     <section className="border-b border-gold/20 bg-surface-lowest py-14 lg:py-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-margin">
@@ -587,7 +603,7 @@ export function StatsRow() {
           </h2>
         </Reveal>
         <div className="grid grid-cols-2 gap-3 text-center lg:grid-cols-4 lg:gap-0">
-          {STATS.map((s, i) => (
+          {stats.map((s, i) => (
             <div key={s.label} className={`bg-surface p-5 lg:bg-transparent lg:p-0 lg:px-4 ${i < 3 ? "lg:border-r lg:border-gold/15" : ""}`}>
               <div className="font-serif text-display-hero-m lg:text-display-hero tracking-tight text-gold-soft">
                 <CountUp value={s.value} suffix={s.suffix} />

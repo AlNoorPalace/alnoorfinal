@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CalendarDays, ChevronDown, Phone, Users } from "lucide-react";
-import { CONTACT, Hotel, formatINR, minPrice } from "../../data/hotels";
+import { Hotel, formatINR, formatPhone, hotelPhone, minPrice } from "../../data/hotels";
 import { useBooking } from "./BookingContext";
 import { Stepper } from "./BookingBar";
 import RangeCalendar from "./RangeCalendar";
@@ -42,17 +42,19 @@ export default function HotelBookingPanel({ hotel }: { hotel: Hotel }) {
       id="hotel-booking"
       className="scroll-mt-28 border border-gold/30 bg-surface-high/95 p-6 shadow-console"
     >
-      <div className="flex items-baseline justify-between border-b border-gold/20 pb-4">
-        <div>
-          <span className="block text-[11px] uppercase tracking-widest text-on-surface-variant">
-            From
-          </span>
-          <span className="font-serif text-[32px] leading-8 text-gold-soft">
-            {formatINR(minPrice(hotel))}
-          </span>
+      {minPrice(hotel) !== null && (
+        <div className="flex items-baseline justify-between border-b border-gold/20 pb-4">
+          <div>
+            <span className="block text-[11px] uppercase tracking-widest text-on-surface-variant">
+              From
+            </span>
+            <span className="font-serif text-[32px] leading-8 text-gold-soft">
+              {formatINR(minPrice(hotel)!)}
+            </span>
+          </div>
+          <span className="text-[12px] text-on-surface-variant">per night, onwards</span>
         </div>
-        <span className="text-[12px] text-on-surface-variant">per night, onwards</span>
-      </div>
+      )}
 
       <div className="mt-5 space-y-3">
         <div>
@@ -145,11 +147,11 @@ export default function HotelBookingPanel({ hotel }: { hotel: Hotel }) {
         Check rooms
       </button>
       <a
-        href={`tel:+91${hotel.phone}`}
+        href={`tel:+91${hotelPhone(hotel)}`}
         className="mt-3 flex items-center justify-center gap-2 border border-gold/40 py-3 text-[13px] text-on-surface transition-colors hover:bg-gold/10"
       >
         <Phone size={14} className="text-gold" />
-        Call +91 {hotel.phone.slice(0, 5)} {hotel.phone.slice(5)}
+        Call +91 {formatPhone(hotelPhone(hotel))}
       </a>
       <p className="mt-4 text-center text-[11px] text-on-surface-variant/70">
         Send a request now. Our team confirms availability by phone.

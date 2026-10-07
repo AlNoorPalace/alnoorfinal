@@ -20,7 +20,6 @@ npm run dev                  # http://localhost:3000
 | `npm run typecheck` | Type-check without emitting   |
 | `npm test`          | Run the SQL, validation and service tests |
 | `npm run dev:db`    | Local Supabase stand-in (see below) |
-| `npm run seed:sql`  | Regenerate `supabase/seed.sql` from `data/hotels.ts` |
 
 ## Environment variables
 
@@ -46,10 +45,11 @@ pages/
   hotels.tsx           Hotels listing with city filter
   hotels/[slug].tsx    Hotel detail page (one per branch, statically generated)
   manage-booking.tsx   Guest lookup / cancel by reference + phone
-  admin.tsx            Admin dashboard (bookings, rooms & rates)
+  admin.tsx            Admin dashboard (bookings, hotels, rooms & rates, availability)
   api/availability.ts  Live availability and prices
   api/bookings/        Create, look up and cancel bookings
-  api/admin/           Admin login/session, bookings, rooms
+  api/hotels.ts        Public list of hotels (what the website shows)
+  api/admin/           Admin login/session, bookings, hotels, rooms, availability, photo upload
   api/send-booking.ts  Legacy email request (used when Supabase isn't configured)
   _app.tsx             Global styles, tracking scripts, booking provider + modal
   _document.tsx        Fonts and favicon
@@ -62,12 +62,15 @@ components/site/
   HotelBookingPanel.tsx, HotelGallery.tsx, Faq.tsx   Hotel detail page pieces
   SiteHeader.tsx, SiteFooter.tsx, MobileActionBar.tsx, HotelCard.tsx, Seo.tsx, motion.tsx, dates.ts
 lib/booking/           Validation (zod), database adapter, service layer, emails
+lib/siteHotels.ts       Loads the hotels the website shows (database, with a built-in fallback)
+lib/revalidate.ts      Refreshes site pages right after an admin change
+lib/images.ts          Rules for hotel photos (allowed sources, type checks)
+components/admin/      Admin screens (Bookings, Hotels, Rooms, Availability)
 lib/admin/auth.ts      Signed-cookie admin session
-supabase/migrations/   Database schema + booking functions
-supabase/seed.sql      Generated room types (run `npm run seed:sql`)
-scripts/               Seed generator and the local Supabase stand-in
+supabase/migrations/   Database: bookings (1st file), hotels/rooms/closures/admin functions (2nd file)
+scripts/               The local Supabase stand-in
 tests/                 SQL, validation and service tests
-data/hotels.ts         Single source of truth: hotels, rooms, prices, services, reviews, stats, contacts
+data/hotels.ts         Site copy (services, reviews, stats, contacts) and the built-in hotel list used as a fallback
 data/hotelContent.ts   Detail-page content derived from the data (gallery, FAQs, nearby places)
 data/seo.ts            schema.org JSON-LD builders
 public/img/            Optimized WebP images
@@ -77,11 +80,11 @@ tailwind.config.js     Design tokens (gold / black / white palette, fonts, type 
 
 ## Common edits
 
-- **Add or edit a hotel, room type or price:** `data/hotels.ts` (a new hotel automatically gets its own `/hotels/<slug>` page and sitemap entry).
-- **Hotel photos:** gallery and room photos are placeholders in `data/hotelContent.ts` (look for `TODO(photo)`).
-- **Replace a hotel photo:** put an optimized image in `public/img/` and update that hotel's `image` in `data/hotels.ts` (look for `TODO(photo)`).
-- **Change phone numbers or email:** `CONTACT` in `data/hotels.ts`.
+- **Hotels, rooms, rates and availability:** managed in `/admin` once Supabase is set up (see below). No code change or redeploy needed.
+- **Without Supabase:** the site shows the built-in hotels from `data/hotels.ts` (edit that file to change them).
+- **Phone numbers or email:** `CONTACT` in `data/hotels.ts`.
 - **Colours and type:** `tailwind.config.js`.
+- **Site copy** (services, reviews, stats, corporate perks): `data/hotels.ts`.
 
 ## Booking engine (Supabase, pay at hotel)
 
@@ -100,12 +103,35 @@ How it works:
 ### Set up Supabase
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run, in order: `supabase/migrations/20260101000000_booking_engine.sql`, then `supabase/seed.sql`. (Or use the Supabase CLI: `supabase db push`.)
-3. In **Project Settings > API** copy the **Project URL** and the **`service_role`** key into `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Treat the service-role key like a password.
-4. Set `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` (`openssl rand -base64 32`), plus `GMAIL_USER` / `GMAIL_PASS` for emails.
+2. Open **SQL Editor** and run these two files **in this order** (each is safe to run once; the second can also be run later on a site that already has bookings, and it keeps all existing data):
+   1. `supabase/migrations/20260101000000_booking_engine.sql` (bookings and booking functions)
+   2. `supabase/migrations/20260102000000_hotel_management.sql` (hotels, rooms, closures, admin functions, photo storage; it also loads your current 7 hotels and 19 room types)
+
+   (Or use the Supabase CLI: `supabase db push`.)
+3. In **Project Settings > API** copy the **Project URL** and the **`service_role`** key into `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Treat the service-role key like a password. **`SUPABASE_URL` must also be set when the site is built** (it lets the site show photos you upload).
+4. Set `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` (`openssl rand -base64 32`, or `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` on Windows), plus `GMAIL_USER` / `GMAIL_PASS` for emails.
 5. Open `/admin`, go to **Rooms & rates**, and **set the real number of rooms for every room type**.
 
-> **Important:** `supabase/seed.sql` uses a **placeholder of 3 rooms per room type**, because the real counts are not in the codebase. Availability and overbooking protection are only as accurate as these numbers. Set the real counts in `/admin` **before** accepting bookings. Re-running the seed never overwrites counts or rates you have edited.
+> **Important:** the second file loads your hotels with a **placeholder of 3 rooms per room type**, because the real counts are not in the codebase. Availability and overbooking protection are only as accurate as these numbers. Set the real counts in `/admin` **before** accepting bookings. Re-running the file never overwrites hotels, counts or rates you have edited.
+
+### Managing hotels in the admin (`/admin`)
+
+| Tab | What you can do |
+| --- | --- |
+| **Bookings** | Search, filter and cancel bookings. |
+| **Hotels** | **Add** a hotel (name, city, description, phone, map location, amenities, photo), **edit** it, **hide/show** it, change the display order, or **delete** it. |
+| **Rooms & rates** | **Add**, edit or delete room types for a hotel: number of rooms, nightly rate, max guests, beds, baths, and whether it can be booked. |
+| **Availability** | A calendar of free rooms per night for each room type, and **close rooms** for dates (maintenance, events, blackouts). |
+
+Good to know:
+
+- **Changes appear on the website immediately** (the affected pages are rebuilt on save; otherwise within 5 minutes). A new hotel gets its own page at `/hotels/<url-name>` and a sitemap entry automatically.
+- **Photos:** pick one of the site's bundled photos or **upload your own** (JPEG, PNG or WebP; shrunk automatically, 3 MB max). Only those two sources are accepted.
+- **Hide vs delete:** *Hide* removes a hotel from the website and stops new bookings but keeps everything (including existing bookings, which guests can still look up). *Delete* is only allowed when the hotel (or room type) has **never had a booking**, because booking history is kept; otherwise hide it instead. Deleting a hotel also deletes its room types.
+- **Closing rooms** takes them off sale for the dates you choose (the end date is included) and is respected by the booking engine immediately. Existing bookings are **never cancelled automatically**: if you close rooms that are already booked, you'll get a warning so you can contact those guests or cancel them in Bookings.
+- **Photo uploads need the `hotel-images` storage bucket.** The second SQL file creates it. If uploads fail with a "bucket not found" error, create it by hand: Supabase **Storage > New bucket**, name `hotel-images`, tick **Public bucket**.
+- A hotel with no room types yet shows "Call to book" and can't be booked online until you add rooms.
+- If the database can't be reached, the website keeps working from its built-in hotels and logs a warning.
 
 ### Security notes
 
@@ -118,13 +144,15 @@ How it works:
     -H "Content-Type: application/json" -d '{"p":{}}'
   ```
 
+- All new tables (`hotels`, `room_blocks`) also have Row Level Security on with no policies, and their functions are revoked from `anon`/`authenticated`. Photo **uploads** go through the admin API (type checked from the file's real bytes, size limited, random file names); the storage bucket is public for reading only.
+- Hotel photos can only come from the site's bundled `/img/` files or this project's storage bucket; anything else is rejected, so a bad value can't break pages.
 - Booking, lookup and login endpoints are rate limited per IP. The limiter is per server instance (best effort on serverless), and a hidden honeypot field blocks simple bots.
 - Free-tier Supabase projects pause after a period of inactivity. Use a paid plan (or keep the project active) for production.
 
 ### Local development without Supabase
 
 ```bash
-npm run dev:db     # embedded Postgres running the real migration + seed on :54321
+npm run dev:db     # embedded Postgres running the real migrations on :54321, with photo storage
 # in .env.local:
 #   SUPABASE_URL=http://127.0.0.1:54321
 #   SUPABASE_SERVICE_ROLE_KEY=local-dev-key
@@ -132,7 +160,7 @@ npm run dev:db     # embedded Postgres running the real migration + seed on :543
 npm run dev
 ```
 
-Data is kept in memory (set `MOCK_SUPABASE_DATA_DIR=.pglite` to persist). `MOCK_ROOMS_PER_TYPE=2` changes the stock, handy for testing sold-out states. This stand-in is for development and tests only.
+Data is kept in memory (set `MOCK_SUPABASE_DATA_DIR=.pglite` to persist). `MOCK_ROOMS_PER_TYPE=2` changes the stock, handy for testing sold-out states. `MOCK_SKIP_SEED=1` starts with no hotels or rooms. `MOCK_MIGRATIONS_ONLY=1` starts with just the first migration, to see the "run the second file" message. This stand-in is for development and tests only.
 
 ## Layout
 

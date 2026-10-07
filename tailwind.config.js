@@ -3,6 +3,7 @@ module.exports = {
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/site/**/*.{ts,tsx}",
+    "./components/admin/**/*.{ts,tsx}",
     "./data/**/*.ts",
   ],
   theme: {

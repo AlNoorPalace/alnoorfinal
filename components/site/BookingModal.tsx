@@ -11,7 +11,8 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { CONTACT, formatINR, getHotel } from "../../data/hotels";
+import { CONTACT, findHotel, formatINR } from "../../data/hotels";
+import { useHotels } from "./HotelsContext";
 import { useBooking } from "./BookingContext";
 import { fmtLong, nightsBetween } from "./dates";
 
@@ -48,7 +49,8 @@ const errorText = (code: string, phone: string) =>
 
 export default function BookingModal() {
   const { modalOpen, closeModal, search, preferredRoom, focusBar } = useBooking();
-  const hotel = getHotel(search.hotel);
+  const hotels = useHotels();
+  const hotel = findHotel(hotels, search.hotel);
   const nights = nightsBetween(search.checkIn, search.checkOut);
   const guests = search.adults + search.children;
   const phoneLabel = CONTACT.phones[0].label;
@@ -234,7 +236,7 @@ export default function BookingModal() {
           name: form.name.trim(),
           phone: form.phone.trim(),
           email: form.email.trim(),
-          branch: hotel.branch,
+          branch: hotel.name,
           checkin: search.checkIn,
           checkout: search.checkOut,
           days: nights,
@@ -457,15 +459,22 @@ export default function BookingModal() {
                             );
                           })}
                         </div>
-                        {options.every((o) => o.available === 0) && engine && (
+                        {engine && options.length === 0 && (
+                          <p role="status" className="mt-4 border border-gold/30 p-4 text-[14px] text-on-surface-variant">
+                            Online booking isn&apos;t available for this hotel right now. Please call us on {phoneLabel} and we&apos;ll book your room.
+                          </p>
+                        )}
+                        {engine && options.length > 0 && options.every((o) => o.available === 0) && (
                           <p className="mt-4 text-[14px] text-on-surface-variant">
                             Everything is booked for these dates. Try different dates or call us on {phoneLabel}.
                           </p>
                         )}
-                        <label className="mt-5 flex cursor-pointer items-center gap-3 text-[14px] text-on-surface-variant">
-                          <input type="checkbox" checked={corporate} onChange={(e) => setCorporate(e.target.checked)} className="h-4 w-4 accent-[#C9A24B]" />
-                          Corporate booking <span className="text-gold">(20% discount)</span>
-                        </label>
+                        {options.length > 0 && (
+                          <label className="mt-5 flex cursor-pointer items-center gap-3 text-[14px] text-on-surface-variant">
+                            <input type="checkbox" checked={corporate} onChange={(e) => setCorporate(e.target.checked)} className="h-4 w-4 accent-[#C9A24B]" />
+                            Corporate booking <span className="text-gold">(20% discount)</span>
+                          </label>
+                        )}
                       </>
                     )}
 

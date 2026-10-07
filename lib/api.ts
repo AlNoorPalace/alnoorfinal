@@ -3,6 +3,10 @@ import type { ZodError } from "zod";
 
 const ERROR_STATUS: Record<string, number> = {
   sold_out: 409,
+  name_taken: 409,
+  slug_taken: 409,
+  has_bookings: 409,
+  hotel_not_found: 404,
   stay_started: 409,
   over_capacity: 422,
   invalid_dates: 400,

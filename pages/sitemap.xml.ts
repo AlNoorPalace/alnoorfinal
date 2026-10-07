@@ -1,10 +1,12 @@
 import type { GetServerSideProps } from "next";
-import { HOTELS, SITE_URL } from "../data/hotels";
+import { SITE_URL } from "../data/hotels";
+import { getSiteHotels } from "../lib/siteHotels";
 
-const PATHS = ["/", "/hotels", ...HOTELS.map((h) => `/hotels/${h.slug}`)];
+const STATIC_PATHS = ["/", "/hotels"];
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  const urls = PATHS.map(
+  const paths = [...STATIC_PATHS, ...(await getSiteHotels()).map((h) => `/hotels/${h.slug}`)];
+  const urls = paths.map(
     (p) => `  <url><loc>${SITE_URL}${p === "/" ? "" : p}</loc></url>`
   ).join("\n");
   res.setHeader("Content-Type", "application/xml; charset=utf-8");

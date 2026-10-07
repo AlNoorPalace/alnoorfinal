@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { allow, notConfigured, sendInvalid, serverError, statusFor } from "../../../lib/api";
 import { requireAdmin } from "../../../lib/admin/auth";
-import { idBody, roomSave } from "../../../lib/admin/schemas";
+import { hotelDelete, hotelSave } from "../../../lib/admin/schemas";
 import { getDb } from "../../../lib/booking/db";
-import { adminDeleteRoomType, adminListRoomTypes, adminSaveRoomType } from "../../../lib/booking/service";
+import { adminDeleteHotel, adminListHotels, adminSaveHotel } from "../../../lib/booking/service";
 import { revalidateSite } from "../../../lib/revalidate";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -13,24 +13,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!db) return notConfigured(res);
 
   try {
-    if (req.method === "GET") return res.status(200).json({ roomTypes: await adminListRoomTypes(db) });
+    if (req.method === "GET") return res.status(200).json({ hotels: await adminListHotels(db) });
 
     if (req.method === "POST") {
-      const parsed = roomSave.safeParse(req.body);
+      const parsed = hotelSave.safeParse(req.body);
       if (!parsed.success) return sendInvalid(res, parsed.error);
-      const result = await adminSaveRoomType(db, parsed.data);
+      const result = await adminSaveHotel(db, parsed.data);
       if (!result.ok) return res.status(statusFor(result.error)).json({ error: result.error });
-      await revalidateSite(res);
-      return res.status(parsed.data.id ? 200 : 201).json({ roomType: result.room_type });
+      await revalidateSite(res, [parsed.data.slug]);
+      return res.status(parsed.data.mode === "create" ? 201 : 200).json({ hotel: result.hotel });
     }
 
-    const parsed = idBody.safeParse(req.body);
+    const parsed = hotelDelete.safeParse(req.body);
     if (!parsed.success) return sendInvalid(res, parsed.error);
-    const result = await adminDeleteRoomType(db, parsed.data.id);
-    if (!result.ok) return res.status(statusFor(result.error)).json(result);
-    await revalidateSite(res);
+    const result = await adminDeleteHotel(db, parsed.data.slug);
+    if (!result.ok) {
+      return res.status(statusFor(result.error)).json(result);
+    }
+    await revalidateSite(res, [parsed.data.slug]);
     res.status(200).json({ ok: true });
   } catch (e) {
-    serverError(res, e, "admin rooms");
+    serverError(res, e, "admin hotels");
   }
 }

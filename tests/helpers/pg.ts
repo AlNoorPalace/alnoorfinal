@@ -1,11 +1,15 @@
 import { readFileSync } from "node:fs";
 import { PGlite } from "@electric-sql/pglite";
 
-/** Fresh in-memory Postgres with the real migration (+ optional seed) applied. */
-export async function makeDb({ seed = true }: { seed?: boolean } = {}) {
+export const MIGRATIONS = [
+  "supabase/migrations/20260101000000_booking_engine.sql",
+  "supabase/migrations/20260102000000_hotel_management.sql",
+];
+
+/** Fresh in-memory Postgres with the real migrations applied (7 hotels, 19 room types). */
+export async function makeDb() {
   const db = new PGlite();
-  await db.exec(readFileSync("supabase/migrations/20260101000000_booking_engine.sql", "utf8"));
-  if (seed) await db.exec(readFileSync("supabase/seed.sql", "utf8"));
+  for (const m of MIGRATIONS) await db.exec(readFileSync(m, "utf8"));
 
   /** Same contract as supabase.rpc(fn, { p }): one jsonb in, one jsonb out. */
   async function rpc<T = any>(fn: string, p: unknown = {}): Promise<T> {
@@ -14,7 +18,14 @@ export async function makeDb({ seed = true }: { seed?: boolean } = {}) {
     ]);
     return r.rows[0].r;
   }
-  return { db, rpc };
+  /** Same shape the app's service layer expects. */
+  const dbApi = {
+    rpc,
+    async uploadImage(): Promise<string> {
+      throw new Error("image upload is not available in tests");
+    },
+  };
+  return { db, rpc, dbApi };
 }
 
 export const iso = (offsetDays: number) => {

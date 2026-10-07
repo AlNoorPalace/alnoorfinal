@@ -28,14 +28,13 @@ export interface RoomType {
 export interface Hotel {
   slug: string;
   name: string;
-  branch: string; // value sent to /api/send-booking
   city: string;
   state: string;
   tagline: string;
   description: string;
   phone: string;
-  lat: number;
-  lng: number;
+  lat: number | null;
+  lng: number | null;
   // TODO(photo): replace with real per-branch photography.
   image: string;
   amenities: string[];
@@ -59,11 +58,11 @@ const room = (
   maxGuests: number
 ): RoomType => ({ name, price, beds, baths, maxGuests });
 
+/** Built-in copy of the hotels: used when the database is not configured or unreachable. */
 export const HOTELS: Hotel[] = [
   {
     slug: "triplicane",
     name: "Al Noor Triplicane",
-    branch: "Triplicane Branch",
     city: "Chennai",
     state: "Tamil Nadu",
     tagline: "Heritage Chennai, minutes from Marina Beach",
@@ -84,7 +83,6 @@ export const HOTELS: Hotel[] = [
   {
     slug: "parrys",
     name: "Al Noor Parrys",
-    branch: "Parrys Branch",
     city: "Chennai",
     state: "Tamil Nadu",
     tagline: "Commercial hub, seamless city connectivity",
@@ -100,7 +98,6 @@ export const HOTELS: Hotel[] = [
   {
     slug: "koyambedu",
     name: "Al Noor Koyambedu",
-    branch: "Koyambedu Branch",
     city: "Chennai",
     state: "Tamil Nadu",
     tagline: "Modern stays, also known as Smart Homes",
@@ -116,7 +113,6 @@ export const HOTELS: Hotel[] = [
   {
     slug: "electronic-city",
     name: "Al Noor Electronic City",
-    branch: "Electronic City Branch",
     city: "Bengaluru",
     state: "Karnataka",
     tagline: "In Bengaluru's thriving tech corridor",
@@ -136,7 +132,6 @@ export const HOTELS: Hotel[] = [
   {
     slug: "koramangala",
     name: "Al Noor Koramangala",
-    branch: "Koramangala Branch",
     city: "Bengaluru",
     state: "Karnataka",
     tagline: "One of Bengaluru's most vibrant neighbourhoods",
@@ -156,7 +151,6 @@ export const HOTELS: Hotel[] = [
   {
     slug: "hyderabad",
     name: "Al Noor Hyderabad",
-    branch: "Hyderabad Branch",
     city: "Hyderabad",
     state: "Telangana",
     tagline: "Luxury and convenience in the City of Pearls",
@@ -176,7 +170,6 @@ export const HOTELS: Hotel[] = [
   {
     slug: "ooty",
     name: "Al Noor Ooty",
-    branch: "Ooty Branch",
     city: "Ooty",
     state: "Tamil Nadu",
     tagline: "A peaceful retreat in the Nilgiri hills",
@@ -191,30 +184,70 @@ export const HOTELS: Hotel[] = [
   },
 ];
 
-export const CITIES = ["Chennai", "Bengaluru", "Hyderabad", "Ooty"] as const;
+// ---- Helpers that work on any list of hotels (from the database or the built-in copy) ----
 
-export const getHotel = (slug?: string | null) =>
-  HOTELS.find((h) => h.slug === slug);
+export const findHotel = (hotels: Hotel[], slug?: string | null) =>
+  hotels.find((h) => h.slug === slug);
 
-export const hotelsByCity = (city: string) =>
-  HOTELS.filter((h) => h.city === city);
+/** Cities in the order their first hotel appears. */
+export const citiesOf = (hotels: Hotel[]) =>
+  hotels.reduce<string[]>((acc, h) => (acc.includes(h.city) ? acc : [...acc, h.city]), []);
 
-export const minPrice = (h: Hotel) => Math.min(...h.rooms.map((r) => r.price));
+export const hotelsInCity = (hotels: Hotel[], city: string) =>
+  hotels.filter((h) => h.city === city);
+
+/** Lowest nightly rate, or null when the hotel has no rooms yet. */
+export const minPrice = (h: Hotel): number | null =>
+  h.rooms.length ? Math.min(...h.rooms.map((r) => r.price)) : null;
+
+export const maxPrice = (h: Hotel): number | null =>
+  h.rooms.length ? Math.max(...h.rooms.map((r) => r.price)) : null;
+
+/** The hotel's own number, or the group's main line when it has none. */
+export const hotelPhone = (h: Hotel) => h.phone || CONTACT.phones[0].tel.slice(-10);
+
+/** "73389 44222" */
+export const formatPhone = (digits: string) => `${digits.slice(0, 5)} ${digits.slice(5)}`;
+
+/** "Chennai, Bengaluru and Ooty" */
+export const joinList = (items: string[]) =>
+  items.length <= 1
+    ? items.join("")
+    : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+
+/** Short label used above city names. Unknown cities simply get none. */
+export const CITY_EYEBROW: Record<string, string> = {
+  Chennai: "Coromandel Coast",
+  Bengaluru: "Garden City",
+  Hyderabad: "City of Pearls",
+  Ooty: "Nilgiri Hills",
+};
+
+/** Photos bundled with the site that the admin can pick for a hotel. */
+export const BUNDLED_IMAGES: { src: string; label: string }[] = [
+  { src: "/img/lobby.webp", label: "Reception and lobby" },
+  { src: "/img/reception.webp", label: "Reception desk" },
+  { src: "/img/entrance.webp", label: "Entrance" },
+  { src: "/img/corridor.webp", label: "Corridor" },
+  { src: "/img/facade-close.webp", label: "Hotel exterior" },
+  { src: "/img/hero-facade.webp", label: "Hotel exterior (wide)" },
+  { src: "/img/night-facade.webp", label: "Exterior at night" },
+  { src: "/img/night-grids.webp", label: "Exterior at night (restaurant)" },
+  { src: "/img/pool-dusk.webp", label: "Pool at dusk" },
+];
+
+/** Amenities the admin can tick for a hotel. */
+export const AMENITY_OPTIONS = [
+  "Wi-Fi",
+  "Parking",
+  "Restaurant",
+  "24h Room Service",
+  "Power Backup",
+  "Laundry",
+] as const;
 
 export const formatINR = (n: number) =>
   "₹" + new Intl.NumberFormat("en-IN").format(Math.round(n));
-
-// City tiles. TODO(photo): swap for dedicated city photography.
-export const CITY_TILES: {
-  city: (typeof CITIES)[number];
-  image: string;
-  eyebrow: string;
-}[] = [
-  { city: "Chennai", image: "/img/hero-facade.webp", eyebrow: "Coromandel Coast" },
-  { city: "Bengaluru", image: "/img/lobby.webp", eyebrow: "Garden City" },
-  { city: "Hyderabad", image: "/img/corridor.webp", eyebrow: "City of Pearls" },
-  { city: "Ooty", image: "/img/pool-dusk.webp", eyebrow: "Nilgiri Hills" },
-];
 
 export interface FeaturedRoom {
   title: string;
