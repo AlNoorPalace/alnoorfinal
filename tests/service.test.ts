@@ -14,8 +14,7 @@ const input = (over: object = {}) =>
   });
 
 test("service applies the 20% corporate discount only when asked", async () => {
-  const { rpc } = await makeDb();
-  const db = { rpc };
+  const { dbApi: db } = await makeDb();
   const plain = await createBooking(db, input());
   assert.ok(plain.ok && plain.booking);
   assert.deepEqual([plain.booking.subtotal, plain.booking.discount, plain.booking.total], [5996, 0, 5996]);
@@ -25,8 +24,7 @@ test("service applies the 20% corporate discount only when asked", async () => {
 });
 
 test("availability, lookup and cancel round-trip through the service layer", async () => {
-  const { rpc } = await makeDb();
-  const db = { rpc };
+  const { dbApi: db } = await makeDb();
   const q = { hotel: "electronic-city", checkIn: start, checkOut: addDays(start, 2) };
   assert.equal((await getAvailability(db, q)).find((r) => r.room_type === "Deluxe Twin")?.available, 3);
 
@@ -46,8 +44,7 @@ test("availability, lookup and cancel round-trip through the service layer", asy
 });
 
 test("sold-out surfaces as a structured error, not an exception", async () => {
-  const { rpc } = await makeDb();
-  const db = { rpc };
+  const { dbApi: db } = await makeDb();
   await createBooking(db, input({ rooms: 3, adults: 6 }));
   const r = await createBooking(db, input());
   assert.deepEqual([r.ok, !r.ok && r.error, !r.ok && r.available], [false, "sold_out", 0]);

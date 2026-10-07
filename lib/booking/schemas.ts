@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { HOTELS, getHotel } from "../../data/hotels";
 import { LIMITS, addDays, diffDays, todayIST } from "./config";
 
 const dateStr = z
@@ -11,7 +10,8 @@ const dateStr = z
     return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
   }, "Invalid date");
 
-const hotelSlug = z.string().refine((s) => HOTELS.some((h) => h.slug === s), "Unknown hotel");
+// Whether the hotel/room exist is decided by the database (it returns room_not_found).
+const hotelSlug = z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Unknown hotel").max(40);
 
 /** Shared date rules (today is evaluated in India time). */
 function checkStay<T extends { checkIn: string; checkOut: string }>(v: T, ctx: z.RefinementCtx) {
@@ -52,10 +52,6 @@ export const createBookingBody = z
     website: z.string().max(0).optional(),
   })
   .superRefine(checkStay)
-  .superRefine((v, ctx) => {
-    if (!getHotel(v.hotel)?.rooms.some((r) => r.name === v.roomType))
-      ctx.addIssue({ code: "custom", path: ["roomType"], message: "Unknown room type" });
-  });
 
 export const lookupBody = z.object({
   reference: z.string().trim().min(6).max(20),

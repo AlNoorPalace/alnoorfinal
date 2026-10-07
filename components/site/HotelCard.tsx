@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Car, Phone, Utensils, Wifi } from "lucide-react";
-import { CONTACT, Hotel, formatINR, minPrice } from "../../data/hotels";
+import { CONTACT, Hotel, formatINR, formatPhone, hotelPhone, minPrice } from "../../data/hotels";
 import { useBooking } from "./BookingContext";
 
 export default function HotelCard({ hotel }: { hotel: Hotel }) {
   const { reserve } = useBooking();
+  const phone = hotelPhone(hotel);
   return (
     <article className="group flex flex-col overflow-hidden border border-gold/30 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
       <Link
@@ -25,7 +26,7 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
           {hotel.city} · {hotel.state}
         </span>
         <span className="absolute bottom-3 left-3 bg-gold px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-ink">
-          From {formatINR(minPrice(hotel))} / night
+          {minPrice(hotel) !== null ? `From ${formatINR(minPrice(hotel)!)} / night` : "Call to book"}
         </span>
       </Link>
       <div className="flex flex-1 flex-col justify-between p-5">
@@ -53,14 +54,14 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
             <div>
               <span className="block text-[11px] text-gold-ink/80">Direct contact</span>
               <a
-                href={`tel:+91${hotel.phone}`}
+                href={`tel:+91${phone}`}
                 className="text-[16px] font-semibold text-[#1B1C19] transition-colors hover:text-gold-deep"
               >
-                +91 {hotel.phone.slice(0, 5)} {hotel.phone.slice(5)}
+                +91 {formatPhone(phone)}
               </a>
             </div>
             <a
-              href={`tel:+91${hotel.phone}`}
+              href={`tel:+91${phone}`}
               aria-label={`Call ${hotel.name}`}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-gold text-gold-ink transition-colors hover:bg-gold hover:text-white"
             >

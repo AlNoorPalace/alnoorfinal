@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { STORAGE_BUCKET } from "../images";
 
 /**
  * All database access goes through Postgres functions (supabase/migrations),
@@ -6,6 +7,8 @@ import { createClient } from "@supabase/supabase-js";
  */
 export interface Db {
   rpc<T = unknown>(fn: string, payload: unknown): Promise<T>;
+  /** Stores an image in the public hotel-images bucket and returns its public URL. */
+  uploadImage(path: string, bytes: Buffer, contentType: string): Promise<string>;
 }
 
 export class DbError extends Error {}
@@ -27,6 +30,13 @@ export function getDb(): Db | null {
       const { data, error } = await client.rpc(fn, { p: payload });
       if (error) throw new DbError(`${fn}: ${error.message}`);
       return data as T;
+    },
+    async uploadImage(path: string, bytes: Buffer, contentType: string) {
+      const { error } = await client.storage
+        .from(STORAGE_BUCKET)
+        .upload(path, bytes, { contentType, upsert: false, cacheControl: "31536000" });
+      if (error) throw new DbError(`upload: ${error.message}`);
+      return `${url.replace(/\/$/, "")}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
     },
   };
   return cached;

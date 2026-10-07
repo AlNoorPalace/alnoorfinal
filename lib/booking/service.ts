@@ -13,6 +13,7 @@ export interface RoomAvailability {
 export interface Booking {
   reference: string;
   hotel: string;
+  hotel_name: string | null;
   room_type: string;
   check_in: string;
   check_out: string;
@@ -86,14 +87,68 @@ export interface AdminRoomType {
   total_rooms: number;
   base_rate: number;
   max_guests: number;
+  beds: number;
+  baths: number;
   active: boolean;
+  bookings: number;
 }
 
-export const adminListRoomTypes = (db: Db) => db.rpc<AdminRoomType[]>("admin_list_room_types", {});
+export interface AdminHotel {
+  slug: string;
+  name: string;
+  city: string;
+  state: string;
+  tagline: string;
+  description: string;
+  phone: string;
+  lat: number | null;
+  lng: number | null;
+  image: string;
+  amenities: string[];
+  active: boolean;
+  sort_order: number;
+  room_types: number;
+  bookings: number;
+}
 
-export const adminUpdateRoomType = (
+export interface CalendarDay {
+  date: string;
+  booked: number;
+  blocked: number;
+  available: number;
+}
+
+export interface RoomBlock {
+  id: string;
+  room_type_id: string;
+  hotel: string;
+  room_type: string;
+  from: string;
+  to: string;
+  rooms: number;
+  reason: string;
+}
+
+export const adminListHotels = (db: Db) => db.rpc<AdminHotel[]>("admin_list_hotels", {});
+export const adminSaveHotel = (db: Db, v: Record<string, unknown>) =>
+  db.rpc<Result<{ hotel: AdminHotel }>>("admin_save_hotel", v);
+export const adminDeleteHotel = (db: Db, slug: string) =>
+  db.rpc<Result<{}>>("admin_delete_hotel", { slug });
+
+export const adminListRoomTypes = (db: Db) => db.rpc<AdminRoomType[]>("admin_list_room_types", {});
+export const adminSaveRoomType = (db: Db, v: Record<string, unknown>) =>
+  db.rpc<Result<{ room_type: AdminRoomType }>>("admin_save_room_type", v);
+export const adminDeleteRoomType = (db: Db, id: string) =>
+  db.rpc<Result<{}>>("admin_delete_room_type", { id });
+
+export const adminCalendar = (db: Db, v: { room_type_id: string; month: string }) =>
+  db.rpc<Result<{ room_type: AdminRoomType; days: CalendarDay[] }>>("admin_calendar", v);
+export const adminListBlocks = (db: Db, v: { room_type_id?: string; hotel?: string; today?: string }) =>
+  db.rpc<RoomBlock[]>("admin_list_blocks", v);
+export const adminAddBlock = (
   db: Db,
-  v: { id: string; total_rooms?: number; base_rate?: number; active?: boolean }
-) => db.rpc<Result<{ room_type: AdminRoomType }>>("admin_update_room_type", v);
+  v: { room_type_id: string; from: string; to: string; rooms?: number; reason?: string }
+) => db.rpc<Result<{ block: unknown; overbooked_nights: number }>>("admin_add_block", v);
+export const adminDeleteBlock = (db: Db, id: string) => db.rpc<Result<{}>>("admin_delete_block", { id });
 
 export const nightsFor = (checkIn: string, checkOut: string) => diffDays(checkIn, checkOut);

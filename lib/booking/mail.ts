@@ -1,4 +1,4 @@
-import { SITE_URL, getHotel, formatINR } from "../../data/hotels";
+import { SITE_URL, formatINR } from "../../data/hotels";
 import { escapeHtml, getTransporter, hotelInbox, mailConfigured } from "../mailer";
 import type { Booking } from "./service";
 
@@ -10,12 +10,11 @@ const fmtDate = (iso: string) => {
 };
 
 function rows(b: Booking) {
-  const hotel = getHotel(b.hotel);
   const line = (k: string, v: string) =>
     `<tr><td style="padding:6px 16px 6px 0;color:#777">${escapeHtml(k)}</td><td style="padding:6px 0"><strong>${escapeHtml(v)}</strong></td></tr>`;
   return [
     line("Booking reference", b.reference),
-    line("Hotel", hotel?.name ?? b.hotel),
+    line("Hotel", b.hotel_name ?? b.hotel),
     line("Room", `${b.room_type} × ${b.rooms}`),
     line("Check-in", fmtDate(b.check_in)),
     line("Check-out", fmtDate(b.check_out)),
@@ -38,7 +37,7 @@ export async function sendBookingEmails(b: Booking): Promise<{ guest: boolean; h
   if (!mailConfigured()) return out;
   const t = getTransporter();
   const from = `"Al Noor Group of Hotels"<${process.env.GMAIL_USER}>`;
-  const hotelName = getHotel(b.hotel)?.name ?? b.hotel;
+  const hotelName = b.hotel_name ?? b.hotel;
 
   try {
     await t.sendMail({
@@ -80,7 +79,7 @@ export async function sendCancellationEmail(b: Booking): Promise<void> {
     await getTransporter().sendMail({
       from: `"Al Noor Group of Hotels"<${process.env.GMAIL_USER}>`,
       to: hotelInbox(),
-      subject: `Cancelled ${b.reference} · ${getHotel(b.hotel)?.name ?? b.hotel}`,
+      subject: `Cancelled ${b.reference} · ${b.hotel_name ?? b.hotel}`,
       html: `<h2>Booking cancelled (${escapeHtml(b.cancelled_by ?? "")})</h2><table>${rows(b)}</table>`,
     });
   } catch (e) {

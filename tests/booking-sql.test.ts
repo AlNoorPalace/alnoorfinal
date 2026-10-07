@@ -4,10 +4,11 @@ import { baseBooking, iso, makeDb } from "./helpers/pg";
 
 const avail = (rows: any[], name: string) => rows.find((r) => r.room_type === name);
 
-test("seed creates 19 room types with the site's prices", async () => {
+test("migrations load the 7 hotels and 19 room types with the site's prices", async () => {
   const { db } = await makeDb();
   const r = await db.query("select count(*)::int n from public.room_types");
   assert.equal((r.rows[0] as any).n, 19);
+  assert.equal(((await db.query("select count(*)::int n from public.hotels")).rows[0] as any).n, 7);
   const { rpc } = await makeDb();
   const rows = await rpc("room_availability", { hotel: "parrys", check_in: iso(0), check_out: iso(1) });
   assert.deepEqual(rows.map((x: any) => [x.room_type, x.rate]), [["Standard", 799], ["Deluxe", 1499]]);
@@ -128,31 +129,36 @@ test("admin: list/filter bookings and update rooms & rates", async () => {
   const rooms = await rpc("admin_list_room_types", {});
   assert.equal(rooms.length, 19);
   const dx = rooms.find((r: any) => r.hotel === "triplicane" && r.name === "Deluxe");
-  const up = await rpc("admin_update_room_type", { id: dx.id, total_rooms: 10, base_rate: 950 });
+  const up = await rpc("admin_save_room_type", { id: dx.id, total_rooms: 10, base_rate: 950 });
   assert.deepEqual([up.ok, up.room_type.total_rooms, up.room_type.base_rate], [true, 10, 950]);
-  assert.equal((await rpc("admin_update_room_type", { id: dx.id, total_rooms: -1 })).error, "invalid");
-  assert.equal((await rpc("admin_update_room_type", { id: dx.id, base_rate: 0 })).error, "invalid");
-  assert.equal((await rpc("admin_update_room_type", { id: "00000000-0000-0000-0000-000000000000" })).error, "not_found");
+  assert.equal((await rpc("admin_save_room_type", { id: dx.id, total_rooms: -1 })).error, "invalid");
+  assert.equal((await rpc("admin_save_room_type", { id: dx.id, base_rate: 0 })).error, "invalid");
+  assert.equal((await rpc("admin_save_room_type", { id: "00000000-0000-0000-0000-000000000000" })).error, "not_found");
   // new rate/stock apply to new bookings
   const b = await rpc("create_booking", baseBooking({ rooms: 4, adults: 8 }));
   assert.deepEqual([b.ok, b.booking.nightly_rate], [true, 950]);
   // inactive room types disappear from availability and can't be booked
-  await rpc("admin_update_room_type", { id: dx.id, active: false });
+  await rpc("admin_save_room_type", { id: dx.id, active: false });
   assert.equal((await rpc("room_availability", { hotel: "triplicane", check_in: iso(0), check_out: iso(1) })).some((r: any) => r.room_type === "Deluxe"), false);
   assert.equal((await rpc("create_booking", baseBooking())).error, "room_not_found");
 });
 
-test("re-seeding never overwrites edited stock or rates", async () => {
+test("re-running the hotel migration never overwrites edited hotels, stock or rates", async () => {
   const { db, rpc } = await makeDb();
   const dx = (await rpc("admin_list_room_types", {})).find((r: any) => r.hotel === "ooty" && r.name === "Standard");
-  await rpc("admin_update_room_type", { id: dx.id, total_rooms: 11, base_rate: 1234 });
-  await db.exec(require("node:fs").readFileSync("supabase/seed.sql", "utf8"));
+  await rpc("admin_save_room_type", { id: dx.id, total_rooms: 11, base_rate: 1234, beds: 3 });
+  await rpc("admin_save_hotel", { mode: "update", slug: "ooty", name: "Al Noor Ooty Hills", tagline: "Edited" });
+  await db.exec(require("node:fs").readFileSync("supabase/migrations/20260102000000_hotel_management.sql", "utf8"));
   const after = (await rpc("admin_list_room_types", {})).find((r: any) => r.id === dx.id);
-  assert.deepEqual([after.total_rooms, after.base_rate], [11, 1234]);
+  assert.deepEqual([after.total_rooms, after.base_rate, after.beds], [11, 1234, 3]);
+  const hotel = (await rpc("admin_list_hotels", {})).find((h: any) => h.slug === "ooty");
+  assert.deepEqual([hotel.name, hotel.tagline], ["Al Noor Ooty Hills", "Edited"]);
+  assert.equal((await rpc("admin_list_hotels", {})).length, 7);
 });
 
-test("row level security is on for both tables", async () => {
+test("row level security is on for every table", async () => {
   const { db } = await makeDb();
-  const r = await db.query("select relname, relrowsecurity from pg_class where relname in ('room_types','bookings') order by 1");
-  assert.deepEqual(r.rows.map((x: any) => [x.relname, x.relrowsecurity]), [["bookings", true], ["room_types", true]]);
+  const r = await db.query("select relname, relrowsecurity from pg_class where relname in ('room_types','bookings','hotels','room_blocks') order by 1");
+  assert.deepEqual(r.rows.map((x: any) => [x.relname, x.relrowsecurity]),
+    [["bookings", true], ["hotels", true], ["room_blocks", true], ["room_types", true]]);
 });

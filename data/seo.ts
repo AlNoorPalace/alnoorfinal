@@ -1,10 +1,18 @@
-import { CONTACT, HOTELS, Hotel, SITE_URL, minPrice } from "./hotels";
+import { CONTACT, Hotel, SITE_URL, hotelPhone, maxPrice, minPrice } from "./hotels";
 import { Faq } from "./hotelContent";
+
+const priceRange = (h: Hotel) =>
+  minPrice(h) === null ? undefined : `₹${minPrice(h)}–₹${maxPrice(h)}`;
+
+const geo = (h: Hotel) =>
+  h.lat === null || h.lng === null
+    ? undefined
+    : { "@type": "GeoCoordinates", latitude: h.lat, longitude: h.lng };
 
 export const OG_IMAGE = `${SITE_URL}/img/og-image.jpg`;
 
 /** schema.org graph: the company plus one Hotel node per branch. */
-export function hotelGroupJsonLd() {
+export function hotelGroupJsonLd(hotels: Hotel[]) {
   const orgId = `${SITE_URL}/#organization`;
   return {
     "@context": "https://schema.org",
@@ -26,27 +34,22 @@ export function hotelGroupJsonLd() {
         publisher: { "@id": orgId },
         inLanguage: "en-IN",
       },
-      ...HOTELS.map((h) => {
-        const prices = h.rooms.map((r) => r.price);
+      ...hotels.map((h) => {
         return {
           "@type": "Hotel",
           "@id": `${SITE_URL}/hotels/${h.slug}`,
           name: h.name,
-          description: h.description,
+          description: h.description || undefined,
           url: `${SITE_URL}/hotels/${h.slug}`,
-          telephone: `+91-${h.phone}`,
-          priceRange: `₹${minPrice(h)}–₹${Math.max(...prices)}`,
+          telephone: `+91-${hotelPhone(h)}`,
+          priceRange: priceRange(h),
           address: {
             "@type": "PostalAddress",
             addressLocality: h.city,
-            addressRegion: h.state,
+            addressRegion: h.state || undefined,
             addressCountry: "IN",
           },
-          geo: {
-            "@type": "GeoCoordinates",
-            latitude: h.lat,
-            longitude: h.lng,
-          },
+          geo: geo(h),
           amenityFeature: h.amenities.map((a) => ({
             "@type": "LocationFeatureSpecification",
             name: a,
@@ -62,7 +65,6 @@ export function hotelGroupJsonLd() {
 /** schema.org graph for one hotel's detail page. */
 export function hotelPageJsonLd(h: Hotel, faqs: Faq[]) {
   const url = `${SITE_URL}/hotels/${h.slug}`;
-  const prices = h.rooms.map((r) => r.price);
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -70,17 +72,17 @@ export function hotelPageJsonLd(h: Hotel, faqs: Faq[]) {
         "@type": "Hotel",
         "@id": url,
         name: h.name,
-        description: h.description,
+        description: h.description || undefined,
         url,
-        telephone: `+91-${h.phone}`,
-        priceRange: `₹${minPrice(h)}–₹${Math.max(...prices)}`,
+        telephone: `+91-${hotelPhone(h)}`,
+        priceRange: priceRange(h),
         address: {
           "@type": "PostalAddress",
           addressLocality: h.city,
-          addressRegion: h.state,
+          addressRegion: h.state || undefined,
           addressCountry: "IN",
         },
-        geo: { "@type": "GeoCoordinates", latitude: h.lat, longitude: h.lng },
+        geo: geo(h),
         amenityFeature: h.amenities.map((a) => ({
           "@type": "LocationFeatureSpecification",
           name: a,
