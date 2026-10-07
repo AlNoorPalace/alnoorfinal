@@ -28,6 +28,8 @@ export function explain(data: any, fallback = "Something went wrong. Please try 
     has_bookings: `It has ${data?.bookings ?? "some"} booking(s), so it can't be deleted. Hide it or switch it off instead, so bookings are kept.`,
     unauthorized: "Your session ended. Please sign in again.",
     rate_limited: "Too many attempts. Please wait a few minutes.",
+    migration_needed: "Photos can't be saved yet: run supabase/migrations/20260103000000_photos.sql in the Supabase SQL Editor, then try again.",
+    upload_failed: "The photo could not be stored. In Supabase, check that Storage has a public bucket named hotel-images (run 20260102000000_hotel_management.sql), and that SUPABASE_SERVICE_ROLE_KEY is the service_role key.",
     too_large: "That photo is too large (max 3 MB).",
     unsupported_type: "Only JPEG, PNG or WebP photos are allowed.",
   };
