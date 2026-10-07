@@ -37,7 +37,9 @@ export default function SiteHeader({ solid = false }: { solid?: boolean }) {
   });
 
   const isActive = (href: string) =>
-    href === "/" ? router.pathname === "/" : router.pathname === href;
+    href === "/"
+      ? router.pathname === "/"
+      : router.pathname === href || router.pathname.startsWith(`${href}/`);
   const bg = scrolled || solid || open;
 
   return (

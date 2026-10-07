@@ -60,3 +60,6 @@ logs
 # /public/temp/
 # /public/uploads/
 
+
+# local mock database
+/.pglite

@@ -73,7 +73,7 @@ export default function SiteFooter() {
                   return (
                     <li key={h.slug}>
                       <Link
-                        href={`/?hotel=${h.slug}#booking-console`}
+                        href={`/hotels/${h.slug}`}
                         className="transition-colors hover:text-gold-soft"
                       >
                         {short}
@@ -105,6 +105,9 @@ export default function SiteFooter() {
               <div className="mt-6 space-y-2 text-body-sm text-on-surface-variant">
                 <Link href="/hotels" className="block transition-colors hover:text-gold-soft">
                   All hotels
+                </Link>
+                <Link href="/manage-booking" className="block transition-colors hover:text-gold-soft">
+                  Manage your booking
                 </Link>
                 <a
                   href="https://pdfhost.io/v/2q5Tz6vNCD_Privacy_policy"

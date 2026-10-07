@@ -1,0 +1,54 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { addDays, todayIST } from "../lib/booking/config";
+import { createBookingBody } from "../lib/booking/schemas";
+import { adminCancel, cancelBooking, createBooking, getAvailability, lookupBooking } from "../lib/booking/service";
+import { makeDb } from "./helpers/pg";
+
+const start = addDays(todayIST(), 20);
+const input = (over: object = {}) =>
+  createBookingBody.parse({
+    hotel: "electronic-city", roomType: "Deluxe Twin", checkIn: start, checkOut: addDays(start, 4),
+    rooms: 1, adults: 2, children: 0, name: "Meera Nair", phone: "+91 98123 45678",
+    email: "meera@example.com", corporate: false, ...over,
+  });
+
+test("service applies the 20% corporate discount only when asked", async () => {
+  const { rpc } = await makeDb();
+  const db = { rpc };
+  const plain = await createBooking(db, input());
+  assert.ok(plain.ok && plain.booking);
+  assert.deepEqual([plain.booking.subtotal, plain.booking.discount, plain.booking.total], [5996, 0, 5996]);
+  const corp = await createBooking(db, input({ corporate: true }));
+  assert.ok(corp.ok && corp.booking);
+  assert.deepEqual([corp.booking.discount, corp.booking.total, corp.booking.corporate], [1199, 4797, true]);
+});
+
+test("availability, lookup and cancel round-trip through the service layer", async () => {
+  const { rpc } = await makeDb();
+  const db = { rpc };
+  const q = { hotel: "electronic-city", checkIn: start, checkOut: addDays(start, 2) };
+  assert.equal((await getAvailability(db, q)).find((r) => r.room_type === "Deluxe Twin")?.available, 3);
+
+  const r = await createBooking(db, input({ rooms: 3, adults: 6 }));
+  assert.ok(r.ok && r.booking);
+  const ref = r.booking.reference;
+  assert.equal((await getAvailability(db, q)).find((x) => x.room_type === "Deluxe Twin")?.available, 0);
+
+  assert.equal((await lookupBooking(db, { reference: ref, phone: "9812345678" })).ok, true);
+  assert.equal((await lookupBooking(db, { reference: ref, phone: "9000000000" })).ok, false);
+  assert.equal((await cancelBooking(db, { reference: ref, phone: "9000000000" })).ok, false);
+  const c = await cancelBooking(db, { reference: ref, phone: "9812345678" });
+  assert.ok(c.ok && c.booking.status === "cancelled");
+  assert.equal((await getAvailability(db, q)).find((x) => x.room_type === "Deluxe Twin")?.available, 3);
+  const again = await adminCancel(db, ref);
+  assert.ok(again.ok);
+});
+
+test("sold-out surfaces as a structured error, not an exception", async () => {
+  const { rpc } = await makeDb();
+  const db = { rpc };
+  await createBooking(db, input({ rooms: 3, adults: 6 }));
+  const r = await createBooking(db, input());
+  assert.deepEqual([r.ok, !r.ok && r.error, !r.ok && r.available], [false, "sold_out", 0]);
+});

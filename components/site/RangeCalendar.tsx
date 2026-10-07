@@ -13,6 +13,8 @@ interface Props {
   checkOut: string | null;
   onChange: (checkIn: string | null, checkOut: string | null) => void;
   onComplete?: () => void;
+  /** Always show one month (for narrow containers). */
+  single?: boolean;
 }
 
 const WEEK = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -99,6 +101,7 @@ export default function RangeCalendar({
   checkOut,
   onChange,
   onComplete,
+  single = false,
 }: Props) {
   const start = useMemo(() => {
     const d = checkIn ? fromISO(checkIn) : new Date();
@@ -124,7 +127,7 @@ export default function RangeCalendar({
 
   return (
     <div>
-      <div className="relative flex gap-8 px-9 md:px-0">
+      <div className={`relative flex gap-8 px-9 ${single ? "" : "md:px-0"}`}>
         <button
           type="button"
           aria-label="Previous month"
@@ -137,7 +140,7 @@ export default function RangeCalendar({
           <ChevronLeft size={16} />
         </button>
         <Month
-          className="w-full md:w-[252px]"
+          className={single ? "w-full" : "w-full md:w-[252px]"}
           year={view.getFullYear()}
           month={view.getMonth()}
           checkIn={checkIn}
@@ -147,7 +150,7 @@ export default function RangeCalendar({
           onHover={setHover}
         />
         <Month
-          className="hidden w-[252px] md:block"
+          className={single ? "hidden" : "hidden w-[252px] md:block"}
           year={next.getFullYear()}
           month={next.getMonth()}
           checkIn={checkIn}

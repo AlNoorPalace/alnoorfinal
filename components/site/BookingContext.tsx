@@ -74,6 +74,15 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   const focusBar = useCallback(
     (hotel?: string) => {
       if (hotel) setSearch({ hotel });
+      const panel =
+        typeof document !== "undefined"
+          ? document.getElementById("hotel-booking")
+          : null;
+      if (panel) {
+        // Hotel detail pages have their own booking panel.
+        panel.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
       const el =
         typeof document !== "undefined"
           ? document.getElementById("booking-console")

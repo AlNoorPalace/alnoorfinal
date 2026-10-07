@@ -74,7 +74,7 @@ function Field({
   );
 }
 
-function Stepper({
+export function Stepper({
   title,
   hint,
   value,
