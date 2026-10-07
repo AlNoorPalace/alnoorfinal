@@ -4,7 +4,7 @@ Marketing and booking-request website for Al Noor Group of Hotels (alnoorpalace.
 
 Built with Next.js (Pages Router), React 18, TypeScript, Tailwind CSS and Framer Motion.
 
-## Getting started  
+## Getting started   
 
 ```bash  
 npm install
