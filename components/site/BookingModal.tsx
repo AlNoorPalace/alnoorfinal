@@ -1,5 +1,6 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import UpiPay from "./UpiPay";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -587,6 +588,7 @@ export default function BookingModal() {
                             ? ` We've emailed your confirmation to ${form.email}.`
                             : " Please note your reference: you'll need it with your phone number to manage the booking."}
                         </p>
+                        {engine && <UpiPay amount={confirmed.total} reference={confirmed.reference} />}
                         <div className="mt-8 flex flex-wrap justify-center gap-3">
                           <Link href="/manage-booking" onClick={closeModal} className="border border-gold/50 px-6 py-3 text-eyebrow font-semibold uppercase tracking-[0.16em] text-on-surface transition-colors hover:bg-gold/10">
                             Manage booking
