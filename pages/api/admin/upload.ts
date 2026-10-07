@@ -46,6 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const url = await db.uploadImage(`${randomUUID()}.${kind.ext}`, bytes, kind.mime);
     res.status(201).json({ url });
   } catch (e) {
-    serverError(res, e, "image upload");
+    console.error("image upload failed", e);
+    res.status(502).json({ error: "upload_failed" });
   }
 }
