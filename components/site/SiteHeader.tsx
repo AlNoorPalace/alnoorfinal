@@ -11,6 +11,7 @@ import {
 import { Menu, Phone, X } from "lucide-react";
 import { CONTACT } from "../../data/hotels";
 import { useBooking } from "./BookingContext";
+import MobileActionBar from "./MobileActionBar";
 
 const NAV = [
   { label: "Home", href: "/" },
@@ -36,7 +37,9 @@ export default function SiteHeader({ solid = false }: { solid?: boolean }) {
   });
 
   const isActive = (href: string) =>
-    href === "/" ? router.pathname === "/" : router.pathname === href;
+    href === "/"
+      ? router.pathname === "/"
+      : router.pathname === href || router.pathname.startsWith(`${href}/`);
   const bg = scrolled || solid || open;
 
   return (
@@ -50,7 +53,7 @@ export default function SiteHeader({ solid = false }: { solid?: boolean }) {
             : "border-transparent bg-gradient-to-b from-black/70 to-transparent"
         }`}
       >
-        <div className="mx-auto flex h-20 max-w-[1600px] items-center justify-between px-margin">
+        <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-6 lg:h-20 lg:px-margin">
           <Link href="/" className="flex items-center gap-3" aria-label="Al Noor Group of Hotels, home">
             <Image
               src="/img/logo-mark.png"
@@ -58,10 +61,10 @@ export default function SiteHeader({ solid = false }: { solid?: boolean }) {
               width={44}
               height={43}
               priority
-              className="h-11 w-auto"
+              className="h-9 w-auto lg:h-11"
             />
             <span className="flex flex-col leading-tight">
-              <span className="font-serif text-[24px] uppercase tracking-wider text-gold-soft">
+              <span className="font-serif text-[20px] uppercase tracking-wider text-gold-soft lg:text-[24px]">
                 Al Noor
               </span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant">
@@ -124,7 +127,7 @@ export default function SiteHeader({ solid = false }: { solid?: boolean }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 flex flex-col justify-center bg-ink px-margin pt-20 lg:hidden"
+            className="fixed inset-0 z-40 flex flex-col justify-center bg-ink px-6 pt-20 lg:hidden"
           >
             {NAV.map((n, i) => (
               <motion.div
@@ -155,6 +158,7 @@ export default function SiteHeader({ solid = false }: { solid?: boolean }) {
           </motion.div>
         )}
       </AnimatePresence>
+      <MobileActionBar />
     </>
   );
 }

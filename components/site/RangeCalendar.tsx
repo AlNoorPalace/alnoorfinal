@@ -13,6 +13,8 @@ interface Props {
   checkOut: string | null;
   onChange: (checkIn: string | null, checkOut: string | null) => void;
   onComplete?: () => void;
+  /** Always show one month (for narrow containers). */
+  single?: boolean;
 }
 
 const WEEK = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
@@ -25,7 +27,9 @@ function Month({
   hover,
   onPick,
   onHover,
+  className,
 }: {
+  className?: string;
   year: number;
   month: number;
   checkIn: string | null;
@@ -44,7 +48,7 @@ function Month({
   const rangeEnd = checkOut ?? (checkIn && hover && hover > checkIn ? hover : null);
 
   return (
-    <div className="w-[252px]">
+    <div className={className ?? "w-[252px]"}>
       <div className="mb-3 text-center font-serif text-[19px] text-on-surface">
         {MONTHS[month]} {year}
       </div>
@@ -97,6 +101,7 @@ export default function RangeCalendar({
   checkOut,
   onChange,
   onComplete,
+  single = false,
 }: Props) {
   const start = useMemo(() => {
     const d = checkIn ? fromISO(checkIn) : new Date();
@@ -122,7 +127,7 @@ export default function RangeCalendar({
 
   return (
     <div>
-      <div className="relative flex gap-8">
+      <div className={`relative flex gap-8 px-9 ${single ? "" : "md:px-0"}`}>
         <button
           type="button"
           aria-label="Previous month"
@@ -130,11 +135,12 @@ export default function RangeCalendar({
           onClick={() =>
             setView(new Date(view.getFullYear(), view.getMonth() - 1, 1))
           }
-          className="absolute -left-1 top-0 flex h-7 w-7 items-center justify-center border border-gold/40 text-gold disabled:opacity-30"
+          className="absolute left-0 top-0 md:-left-1 flex h-7 w-7 items-center justify-center border border-gold/40 text-gold disabled:opacity-30"
         >
           <ChevronLeft size={16} />
         </button>
         <Month
+          className={single ? "w-full" : "w-full md:w-[252px]"}
           year={view.getFullYear()}
           month={view.getMonth()}
           checkIn={checkIn}
@@ -144,6 +150,7 @@ export default function RangeCalendar({
           onHover={setHover}
         />
         <Month
+          className={single ? "hidden" : "hidden w-[252px] md:block"}
           year={next.getFullYear()}
           month={next.getMonth()}
           checkIn={checkIn}
@@ -158,7 +165,7 @@ export default function RangeCalendar({
           onClick={() =>
             setView(new Date(view.getFullYear(), view.getMonth() + 1, 1))
           }
-          className="absolute -right-1 top-0 flex h-7 w-7 items-center justify-center border border-gold/40 text-gold"
+          className="absolute right-0 top-0 md:-right-1 flex h-7 w-7 items-center justify-center border border-gold/40 text-gold"
         >
           <ChevronRight size={16} />
         </button>

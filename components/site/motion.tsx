@@ -110,22 +110,31 @@ export function RevealImage({
     />
   );
   if (reduce) return <div className={className}>{img}</div>;
+  // The observed wrapper is never clipped (a fully clipped element can report as
+  // "not intersecting"); the clip/zoom animate on children through variants.
   return (
     <motion.div
       className={`overflow-hidden ${className}`}
-      initial={{ clipPath: "inset(0 0 100% 0)" }}
-      whileInView={{ clipPath: "inset(0 0 0% 0)" }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 1.1, ease: EASE }}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-40px" }}
     >
       <motion.div
         className="absolute inset-0"
-        initial={{ scale: 1.25 }}
-        whileInView={{ scale: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1.6, ease: EASE }}
+        variants={{
+          hidden: { clipPath: "inset(0 0 100% 0)" },
+          show: { clipPath: "inset(0 0 0% 0)", transition: { duration: 1.1, ease: EASE } },
+        }}
       >
-        {img}
+        <motion.div
+          className="absolute inset-0"
+          variants={{
+            hidden: { scale: 1.25 },
+            show: { scale: 1, transition: { duration: 1.6, ease: EASE } },
+          }}
+        >
+          {img}
+        </motion.div>
       </motion.div>
     </motion.div>
   );

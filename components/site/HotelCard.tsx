@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight, Car, Phone, Utensils, Wifi } from "lucide-react";
 import { CONTACT, Hotel, formatINR, minPrice } from "../../data/hotels";
 import { useBooking } from "./BookingContext";
@@ -7,7 +8,11 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
   const { reserve } = useBooking();
   return (
     <article className="group flex flex-col overflow-hidden border border-gold/30 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl">
-      <div className="relative h-60 overflow-hidden">
+      <Link
+        href={`/hotels/${hotel.slug}`}
+        aria-label={`View ${hotel.name}`}
+        className="relative block h-60 overflow-hidden"
+      >
         <Image
           src={hotel.image}
           alt={`${hotel.name}, ${hotel.city}`}
@@ -22,11 +27,13 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
         <span className="absolute bottom-3 left-3 bg-gold px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-ink">
           From {formatINR(minPrice(hotel))} / night
         </span>
-      </div>
+      </Link>
       <div className="flex flex-1 flex-col justify-between p-5">
         <div>
           <h3 className="font-serif text-[24px] leading-7 text-[#1B1C19]">
-            {hotel.name}
+            <Link href={`/hotels/${hotel.slug}`} className="transition-colors hover:text-gold-deep">
+              {hotel.name}
+            </Link>
           </h3>
           <p className="mt-1 text-[13px] italic text-gold-ink">{hotel.tagline}</p>
           <p className="mt-3 line-clamp-3 text-body-sm text-[#474744]">
@@ -60,13 +67,21 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
               <Phone size={15} />
             </a>
           </div>
-          <button
-            type="button"
-            onClick={() => reserve(hotel.slug)}
-            className="flex w-full items-center justify-center gap-2 bg-gold-gradient py-3 text-eyebrow font-semibold uppercase tracking-[0.14em] text-ink transition-shadow hover:shadow-gold"
-          >
-            Reserve <ArrowRight size={14} />
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href={`/hotels/${hotel.slug}`}
+              className="flex items-center justify-center border border-gold/60 py-3 text-eyebrow font-semibold uppercase tracking-[0.14em] text-gold-ink transition-colors hover:bg-gold/10"
+            >
+              Details
+            </Link>
+            <button
+              type="button"
+              onClick={() => reserve(hotel.slug)}
+              className="flex items-center justify-center gap-2 bg-gold-gradient py-3 text-eyebrow font-semibold uppercase tracking-[0.14em] text-ink transition-shadow hover:shadow-gold"
+            >
+              Reserve <ArrowRight size={14} />
+            </button>
+          </div>
         </div>
       </div>
     </article>

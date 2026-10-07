@@ -2,6 +2,11 @@
 // Content comes from the original site (pages/hotels.tsx, components/home/Rooms.tsx,
 // index.tsx, Footer.tsx). Prices are "onwards" rates in INR per night.
 
+// Canonical site URL. Override per environment with NEXT_PUBLIC_SITE_URL.
+export const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://alnoorpalace.in"
+).replace(/\/$/, "");
+
 export const CONTACT = {
   phones: [
     { label: "+91 73389 44222", tel: "+917338944222" },
@@ -327,25 +332,25 @@ export const REVIEWS = [
     quote:
       "The location of the hotel is excellent as it's near the beach. We stayed for 3 nights, and the suite was spacious and comfortable. The check-in was swift. The staff were very kind and warm. Overall, it was a pleasant stay.",
     name: "Prakash N",
-    img: "/Images/man2.png",
+    img: "/img/reviews/prakash.webp",
   },
   {
     quote:
       "It's a very good place to stay. The hospitality is also very nice. Definitely a place to stay.",
     name: "Hyder Ali",
-    img: "/Images/manavatar.png",
+    img: "/img/reviews/hyder.webp",
   },
   {
     quote:
       "Pleasant stay experience. Really nice hotel and service also good. Will definitely come again.",
     name: "Sonu Kumar",
-    img: "/Images/man3.png",
+    img: "/img/reviews/sonu.webp",
   },
   {
     quote:
       "It was a pleasant stay. The room service and staff were very supportive and helpful. Easy access to the marina and cityside malls.",
     name: "Yasir Arafath",
-    img: "/Images/man4.png",
+    img: "/img/reviews/yasir.webp",
   },
 ];
 

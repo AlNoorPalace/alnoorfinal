@@ -36,6 +36,8 @@ module.exports = {
       },
       fontSize: {
         "display-hero": ["64px", { lineHeight: "72px", letterSpacing: "-0.01em" }],
+        "headline-lg-m": ["32px", { lineHeight: "40px" }],
+        "display-hero-m": ["40px", { lineHeight: "48px", letterSpacing: "-0.01em" }],
         "headline-lg": ["44px", { lineHeight: "52px", letterSpacing: "-0.01em" }],
         "headline-md": ["32px", { lineHeight: "40px" }],
         "headline-sm": ["24px", { lineHeight: "32px", letterSpacing: "0.01em" }],
