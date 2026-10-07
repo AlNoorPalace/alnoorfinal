@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { BUNDLED_ROOM_IMAGES } from "../../data/hotels";
 import type { AdminHotel, AdminRoomType } from "../../lib/booking/service";
-import { api, explain, send } from "./api";
+import { api, deleteUnusedPhotos, explain, send } from "./api";
+import PhotoManager from "./PhotoManager";
 import { FieldError, Label, Notice, btn, btnDanger, btnSolid, field } from "./ui";
 
 type Row = Omit<AdminRoomType, "total_rooms" | "base_rate" | "max_guests" | "beds" | "baths"> & {
@@ -14,7 +16,7 @@ const numbers = (r: { total_rooms: string; base_rate: string; max_guests: string
   total_rooms: Number(r.total_rooms), base_rate: Number(r.base_rate),
   max_guests: Number(r.max_guests), beds: Number(r.beds), baths: Number(r.baths),
 });
-const blankNew = { name: "", total_rooms: "1", base_rate: "", max_guests: "2", beds: "1", baths: "1" };
+const blankNew = { name: "", total_rooms: "1", base_rate: "", max_guests: "2", beds: "1", baths: "1", images: [] as string[] };
 
 export default function RoomsTab({
   hotels,
@@ -31,11 +33,17 @@ export default function RoomsTab({
   const [loaded, setLoaded] = useState(false);
   const [msg, setMsg] = useState<{ tone: "green" | "red"; text: string } | null>(null);
   const [newRoom, setNewRoom] = useState(blankNew);
+  const [photosOpen, setPhotosOpen] = useState<string | null>(null);
+  const saved = useRef<Record<string, string[]>>({}); // photos as last stored, to clean up removed files
   const [newErrors, setNewErrors] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
     const { ok, data } = await api("/api/admin/rooms");
-    if (ok) setRows((data.roomTypes as AdminRoomType[]).map(toRow));
+    if (ok) {
+      const list = data.roomTypes as AdminRoomType[];
+      saved.current = Object.fromEntries(list.map((r) => [r.id, r.images ?? []]));
+      setRows(list.map(toRow));
+    }
     else setMsg({ tone: "red", text: "Could not load rooms." });
     setLoaded(true);
   }, []);
@@ -46,21 +54,21 @@ export default function RoomsTab({
   const edit = (id: string, patch: Partial<Row>) => setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 
   const save = async (r: Row) => {
-    const { ok, data } = await send("/api/admin/rooms", "POST", { id: r.id, name: r.name, active: r.active, ...numbers(r) });
-    if (ok) { setMsg({ tone: "green", text: `Saved ${r.name}.` }); await load(); await reloadHotels(); }
+    const { ok, data } = await send("/api/admin/rooms", "POST", { id: r.id, name: r.name, active: r.active, images: r.images, ...numbers(r) });
+    if (ok) { setMsg({ tone: "green", text: `Saved ${r.name}.` }); await deleteUnusedPhotos(saved.current[r.id] ?? [], r.images); await load(); await reloadHotels(); }
     else setMsg({ tone: "red", text: `${r.name}: ${data?.fields ? Object.values(data.fields).join(" ") : explain(data)}` });
   };
 
   const remove = async (r: Row) => {
     if (!window.confirm(`Delete room type "${r.name}"? This cannot be undone.`)) return;
     const { ok, data } = await send("/api/admin/rooms", "DELETE", { id: r.id });
-    if (ok) { setMsg({ tone: "green", text: `Deleted ${r.name}.` }); await load(); await reloadHotels(); }
+    if (ok) { setMsg({ tone: "green", text: `Deleted ${r.name}.` }); await deleteUnusedPhotos(saved.current[r.id] ?? [], []); await load(); await reloadHotels(); }
     else setMsg({ tone: "red", text: `${r.name}: ${explain(data)}` });
   };
 
   const add = async () => {
     setNewErrors({});
-    const { ok, data } = await send("/api/admin/rooms", "POST", { hotel: hotelSlug, name: newRoom.name, ...numbers(newRoom) });
+    const { ok, data } = await send("/api/admin/rooms", "POST", { hotel: hotelSlug, name: newRoom.name, images: newRoom.images, ...numbers(newRoom) });
     if (ok) {
       setMsg({ tone: "green", text: `Added ${newRoom.name} to ${hotel?.name}.` });
       setNewRoom(blankNew);
@@ -103,17 +111,24 @@ export default function RoomsTab({
               <div><Label htmlFor="n-baths">Baths</Label><input id="n-baths" type="number" min={1} className={num} value={newRoom.baths} onChange={(e) => setNewRoom({ ...newRoom, baths: e.target.value })} /></div>
               <button className={btnSolid} onClick={add}>Add room type</button>
             </div>
+            <div className="mt-4">
+              <Label hint="Optional. The first photo is the one guests see first.">Room photos</Label>
+              <PhotoManager id="n-photos" photos={newRoom.images} onChange={(images) => setNewRoom({ ...newRoom, images })} max={8}
+                stock={BUNDLED_ROOM_IMAGES} firstLabel="Main" emptyNote="No photos yet. The site shows a default room photo until you add some." />
+              <FieldError msg={newErrors.images} />
+            </div>
             {newErrors._ && <p role="alert" className="mt-3 text-sm text-[#ffb4ab]">{newErrors._}</p>}
           </div>
 
           <div className="overflow-x-auto border border-white/10">
-            <table className="w-full min-w-[900px] text-left text-sm">
+            <table className="w-full min-w-[1000px] text-left text-sm">
               <thead className="bg-white/5 text-xs uppercase tracking-wider text-white/60">
-                <tr>{["Room type", "Rooms", "Rate / night (₹)", "Max guests", "Beds", "Baths", "Bookable", "Bookings", ""].map((h) => <th key={h} className={`${cell} font-medium`}>{h}</th>)}</tr>
+                <tr>{["Room type", "Rooms", "Rate / night (₹)", "Max guests", "Beds", "Baths", "Bookable", "Photos", "Bookings", ""].map((h) => <th key={h} className={`${cell} font-medium`}>{h}</th>)}</tr>
               </thead>
               <tbody>
                 {mine.map((r) => (
-                  <tr key={r.id} className="border-t border-white/10">
+                  <Fragment key={r.id}>
+                  <tr className="border-t border-white/10">
                     <td className={cell}><input aria-label={`${r.name} name`} className={`${field} w-44`} value={r.name} onChange={(e) => edit(r.id, { name: e.target.value })} /></td>
                     <td className={cell}><input type="number" min={0} aria-label={`${r.name} rooms`} className={num} value={r.total_rooms} onChange={(e) => edit(r.id, { total_rooms: e.target.value })} /></td>
                     <td className={cell}><input type="number" min={1} aria-label={`${r.name} rate`} className={`${field} w-28`} value={r.base_rate} onChange={(e) => edit(r.id, { base_rate: e.target.value })} /></td>
@@ -121,11 +136,26 @@ export default function RoomsTab({
                     <td className={cell}><input type="number" min={1} aria-label={`${r.name} beds`} className={num} value={r.beds} onChange={(e) => edit(r.id, { beds: e.target.value })} /></td>
                     <td className={cell}><input type="number" min={1} aria-label={`${r.name} baths`} className={num} value={r.baths} onChange={(e) => edit(r.id, { baths: e.target.value })} /></td>
                     <td className={cell}><input type="checkbox" aria-label={`${r.name} bookable`} checked={r.active} onChange={(e) => edit(r.id, { active: e.target.checked })} className="h-4 w-4 accent-[#C9A24B]" /></td>
+                    <td className={cell}>
+                      <button type="button" className={btn} aria-expanded={photosOpen === r.id} aria-label={`${r.name} photos`} onClick={() => setPhotosOpen(photosOpen === r.id ? null : r.id)}>
+                        Photos ({r.images?.length ?? 0})
+                      </button>
+                    </td>
                     <td className={`${cell} text-white/60`}>{r.bookings}</td>
                     <td className={cell}><div className="flex justify-end gap-2"><button className={btn} onClick={() => save(r)}>Save</button><button className={btnDanger} onClick={() => remove(r)}>Delete</button></div></td>
                   </tr>
+                  {photosOpen === r.id && (
+                    <tr className="bg-white/[0.03]">
+                      <td colSpan={10} className="px-4 py-4">
+                        <Label hint="Click Save on this row afterwards to publish the changes.">Photos of {r.name}</Label>
+                        <PhotoManager id={`r-photos-${r.id}`} photos={r.images ?? []} onChange={(images) => edit(r.id, { images })} max={8}
+                          stock={BUNDLED_ROOM_IMAGES} firstLabel="Main" emptyNote="No photos yet. The site shows a default room photo until you add some." />
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 ))}
-                {loaded && mine.length === 0 && <tr><td colSpan={9} className="px-3 py-8 text-center text-white/50">No room types yet. Add one above so guests can book this hotel.</td></tr>}
+                {loaded && mine.length === 0 && <tr><td colSpan={10} className="px-3 py-8 text-center text-white/50">No room types yet. Add one above so guests can book this hotel.</td></tr>}
               </tbody>
             </table>
           </div>

@@ -18,13 +18,14 @@ const ROOMS = process.env.MOCK_ROOMS_PER_TYPE; // optionally override the placeh
 const MIGRATIONS = [
   "supabase/migrations/20260101000000_booking_engine.sql",
   "supabase/migrations/20260102000000_hotel_management.sql",
+  "supabase/migrations/20260103000000_photos.sql",
 ];
 
 const PUBLIC_FUNCTIONS = new Set([
   "room_availability", "create_booking", "get_booking", "cancel_booking", "public_hotels",
   "admin_list_bookings", "admin_list_hotels", "admin_save_hotel", "admin_delete_hotel",
   "admin_list_room_types", "admin_save_room_type", "admin_delete_room_type",
-  "admin_calendar", "admin_list_blocks", "admin_add_block", "admin_delete_block",
+  "admin_calendar", "admin_list_blocks", "admin_add_block", "admin_delete_block", "admin_image_in_use",
 ]);
 
 const photos = new Map<string, { type: string; bytes: Buffer }>();
@@ -55,6 +56,14 @@ async function main() {
         for await (const c of req) chunks.push(c as Buffer);
         photos.set(up[1], { type: String(req.headers["content-type"] || "application/octet-stream"), bytes: Buffer.concat(chunks) });
         return send(200, { Key: `hotel-images/${up[1]}` });
+      }
+      if (req.method === "DELETE" && req.url === "/storage/v1/object/hotel-images") {
+        if (req.headers.apikey !== KEY) return send(401, { message: "Invalid API key" });
+        const chunks: Buffer[] = [];
+        for await (const c of req) chunks.push(c as Buffer);
+        const { prefixes } = JSON.parse(Buffer.concat(chunks).toString() || "{}") as { prefixes?: string[] };
+        for (const name of prefixes ?? []) photos.delete(name);
+        return send(200, (prefixes ?? []).map((name) => ({ name })));
       }
       const pub = /^\/storage\/v1\/object\/public\/hotel-images\/([A-Za-z0-9._-]+)$/.exec(req.url ?? "");
       if (pub && req.method === "GET") {

@@ -30,3 +30,10 @@ export function sniffImage(buf: Buffer): { mime: string; ext: string } | null {
     return { mime: "image/webp", ext: "webp" };
   return null;
 }
+
+/** The storage object name for one of our uploaded photo URLs, or null for bundled/foreign URLs. */
+export function storagePathOf(url: string): string | null {
+  const prefix = storagePrefix();
+  if (!prefix || !url.startsWith(prefix) || !isAllowedImageUrl(url)) return null;
+  return url.slice(prefix.length);
+}

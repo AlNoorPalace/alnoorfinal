@@ -23,6 +23,8 @@ export interface RoomType {
   beds: number;
   baths: number;
   maxGuests: number;
+  /** Admin-uploaded photos of this room type (empty = the site shows a placeholder). */
+  images?: string[];
 }
 
 export interface Hotel {
@@ -37,6 +39,8 @@ export interface Hotel {
   lng: number | null;
   // TODO(photo): replace with real per-branch photography.
   image: string;
+  /** Extra gallery photos uploaded in the admin (the cover is `image`). */
+  images?: string[];
   amenities: string[];
   rooms: RoomType[];
 }
@@ -402,3 +406,9 @@ export const CORPORATE_PERKS = [
   "Business Center",
   "Complimentary Breakfast",
 ];
+
+/** Bundled room photos the admin can pick from (alongside uploads). */
+export const BUNDLED_ROOM_IMAGES: { src: string; label: string }[] = [1, 2, 3, 4, 5].map((n) => ({
+  src: `/img/room-${n}.webp`,
+  label: `Room photo ${n}`,
+}));

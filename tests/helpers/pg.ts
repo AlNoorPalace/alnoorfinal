@@ -4,6 +4,7 @@ import { PGlite } from "@electric-sql/pglite";
 export const MIGRATIONS = [
   "supabase/migrations/20260101000000_booking_engine.sql",
   "supabase/migrations/20260102000000_hotel_management.sql",
+  "supabase/migrations/20260103000000_photos.sql",
 ];
 
 /** Fresh in-memory Postgres with the real migrations applied (7 hotels, 19 room types). */
@@ -24,6 +25,7 @@ export async function makeDb() {
     async uploadImage(): Promise<string> {
       throw new Error("image upload is not available in tests");
     },
+    async removeImage(): Promise<void> {},
   };
   return { db, rpc, dbApi };
 }

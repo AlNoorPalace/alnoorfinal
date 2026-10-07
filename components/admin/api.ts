@@ -52,3 +52,15 @@ export async function prepareImage(file: File): Promise<string> {
     r.readAsDataURL(blob);
   });
 }
+
+/** Removes uploaded files that are no longer used anywhere (the server double-checks and ignores bundled photos). */
+export async function deleteUnusedPhotos(before: string[], after: string[]): Promise<void> {
+  const keep = new Set(after);
+  for (const url of before.filter((u) => !keep.has(u))) {
+    try {
+      await send("/api/admin/upload", "DELETE", { url });
+    } catch {
+      /* leftover files are harmless */
+    }
+  }
+}

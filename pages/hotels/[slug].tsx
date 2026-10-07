@@ -24,6 +24,7 @@ import SiteHeader from "../../components/site/SiteHeader";
 import SiteFooter from "../../components/site/SiteFooter";
 import HotelCard from "../../components/site/HotelCard";
 import HotelGallery from "../../components/site/HotelGallery";
+import RoomPhotos from "../../components/site/RoomPhotos";
 import HotelBookingPanel from "../../components/site/HotelBookingPanel";
 import Faq from "../../components/site/Faq";
 import { useBooking } from "../../components/site/BookingContext";
@@ -36,7 +37,7 @@ import {
   hotelPhone,
   minPrice,
 } from "../../data/hotels";
-import { NEARBY, faqsFor, galleryFor, roomPhoto } from "../../data/hotelContent";
+import { NEARBY, faqsFor, galleryFor, roomPhotos } from "../../data/hotelContent";
 import { hotelPageJsonLd } from "../../data/seo";
 import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../../lib/siteHotels";
 
@@ -220,13 +221,7 @@ export default function HotelPage({ hotel, hotels }: { hotel: Hotel; hotels: Hot
                   <StaggerItem key={r.name}>
                     <article className="group flex flex-col overflow-hidden border border-gold/20 bg-surface transition-colors hover:border-gold/60 sm:flex-row">
                       <div className="relative h-48 shrink-0 overflow-hidden sm:h-auto sm:w-56">
-                        <Image
-                          src={roomPhoto(i)}
-                          alt={`${r.name} room`}
-                          fill
-                          sizes="(min-width: 640px) 224px, 100vw"
-                          className="object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
+                        <RoomPhotos images={roomPhotos(r.images, i)} name={r.name} sizes="(min-width: 640px) 224px, 100vw" />
                       </div>
                       <div className="flex flex-1 flex-col justify-between gap-4 p-5 lg:p-6">
                         <div>
