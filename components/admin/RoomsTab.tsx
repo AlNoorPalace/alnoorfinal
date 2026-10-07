@@ -54,7 +54,7 @@ export default function RoomsTab({
   const edit = (id: string, patch: Partial<Row>) => setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
 
   const save = async (r: Row) => {
-    const { ok, data } = await send("/api/admin/rooms", "POST", { id: r.id, name: r.name, active: r.active, images: r.images, ...numbers(r) });
+    const { ok, data } = await send("/api/admin/rooms", "POST", { id: r.id, name: r.name, active: r.active, images: r.images, description: r.description ?? "", ...numbers(r) });
     if (ok) { setMsg({ tone: "green", text: `Saved ${r.name}.` }); await deleteUnusedPhotos(saved.current[r.id] ?? [], r.images); await load(); await reloadHotels(); }
     else setMsg({ tone: "red", text: `${r.name}: ${data?.fields ? Object.values(data.fields).join(" ") : explain(data)}` });
   };
@@ -138,7 +138,7 @@ export default function RoomsTab({
                     <td className={cell}><input type="checkbox" aria-label={`${r.name} bookable`} checked={r.active} onChange={(e) => edit(r.id, { active: e.target.checked })} className="h-4 w-4 accent-[#C9A24B]" /></td>
                     <td className={cell}>
                       <button type="button" className={btn} aria-expanded={photosOpen === r.id} aria-label={`${r.name} photos`} onClick={() => setPhotosOpen(photosOpen === r.id ? null : r.id)}>
-                        Photos ({r.images?.length ?? 0})
+                        Details &amp; photos ({r.images?.length ?? 0})
                       </button>
                     </td>
                     <td className={`${cell} text-white/60`}>{r.bookings}</td>
@@ -147,7 +147,11 @@ export default function RoomsTab({
                   {photosOpen === r.id && (
                     <tr className="bg-white/[0.03]">
                       <td colSpan={10} className="px-4 py-4">
-                        <Label hint="Click Save on this row afterwards to publish the changes.">Photos of {r.name}</Label>
+                        <Label htmlFor={`r-desc-${r.id}`} hint="Shown on this room's page on the website. Click Save on this row afterwards.">Description of {r.name}</Label>
+                        <textarea id={`r-desc-${r.id}`} rows={3} maxLength={600} className={`${field} mb-4 w-full max-w-2xl`} value={r.description ?? ""}
+                          placeholder="A short description guests will read on the room page."
+                          onChange={(e) => edit(r.id, { description: e.target.value })} />
+                        <Label>Photos of {r.name}</Label>
                         <PhotoManager id={`r-photos-${r.id}`} photos={r.images ?? []} onChange={(images) => edit(r.id, { images })} max={8}
                           stock={BUNDLED_ROOM_IMAGES} firstLabel="Main" emptyNote="No photos yet. The site shows a default room photo until you add some." />
                       </td>

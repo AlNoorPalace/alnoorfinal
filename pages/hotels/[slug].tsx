@@ -39,6 +39,7 @@ import {
 } from "../../data/hotels";
 import { NEARBY, faqsFor, galleryFor, roomPhotos } from "../../data/hotelContent";
 import { hotelPageJsonLd } from "../../data/seo";
+import { roomSlug } from "../../data/rooms";
 import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../../lib/siteHotels";
 
 const AMENITY_ICONS: Record<string, typeof Wifi> = {
@@ -225,7 +226,9 @@ export default function HotelPage({ hotel, hotels }: { hotel: Hotel; hotels: Hot
                       </div>
                       <div className="flex flex-1 flex-col justify-between gap-4 p-5 lg:p-6">
                         <div>
-                          <h3 className="font-serif text-[26px] leading-8 text-on-surface">{r.name}</h3>
+                          <h3 className="font-serif text-[26px] leading-8 text-on-surface">
+                            <Link href={`/rooms/${roomSlug(r.name)}`} className="hover:text-gold-soft">{r.name}</Link>
+                          </h3>
                           <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-on-surface-variant">
                             <span className="flex items-center gap-1.5"><BedDouble size={15} className="text-gold" />{r.beds} bed{r.beds > 1 ? "s" : ""}</span>
                             <span className="flex items-center gap-1.5"><Bath size={15} className="text-gold" />{r.baths} bath</span>

@@ -91,6 +91,7 @@ export interface AdminRoomType {
   baths: number;
   active: boolean;
   images: string[];
+  description: string;
   bookings: number;
 }
 

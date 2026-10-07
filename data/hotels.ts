@@ -25,6 +25,8 @@ export interface RoomType {
   maxGuests: number;
   /** Admin-uploaded photos of this room type (empty = the site shows a placeholder). */
   images?: string[];
+  /** Shown on the room's own page. */
+  description?: string;
 }
 
 export interface Hotel {
