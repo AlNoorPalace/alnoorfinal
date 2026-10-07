@@ -77,7 +77,8 @@ test("capacity and input limits are enforced", async () => {
   assert.equal((await rpc("create_booking", baseBooking({ adults: 3 }))).error, "over_capacity"); // Deluxe max 2
   assert.equal((await rpc("create_booking", baseBooking({ adults: 3, rooms: 2 }))).ok, true);
   assert.equal((await rpc("create_booking", baseBooking({ check_out: iso(0) }))).error, "invalid_dates");
-  assert.equal((await rpc("create_booking", baseBooking({ check_out: iso(31) }))).error, "invalid_dates");
+  assert.ok((await rpc("create_booking", baseBooking({ check_out: iso(31) }))).ok, "31 nights is allowed");
+  assert.equal((await rpc("create_booking", baseBooking({ check_out: iso(366) }))).error, "invalid_dates");
   assert.equal((await rpc("create_booking", baseBooking({ rooms: 7 }))).error, "invalid_guests");
   assert.equal((await rpc("create_booking", baseBooking({ room_type: "Penthouse" }))).error, "room_not_found");
   assert.equal((await rpc("create_booking", baseBooking({ hotel: "nowhere" }))).error, "room_not_found");

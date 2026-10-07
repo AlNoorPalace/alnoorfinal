@@ -26,7 +26,8 @@ test("phone numbers are normalised to the last 10 digits", () => {
 test("dates: past, inverted, too long, too far ahead, malformed", () => {
   assert.deepEqual(fieldsOf(bad({ checkIn: addDays(todayIST(), -1), checkOut: co })), ["checkIn"]);
   assert.deepEqual(fieldsOf(bad({ checkIn: co, checkOut: ci })), ["checkOut"]);
-  assert.deepEqual(fieldsOf(bad({ checkOut: addDays(ci, 31) })), ["checkOut"]);
+  assert.deepEqual(fieldsOf(bad({ checkOut: addDays(ci, 31) })), []); // long stays are allowed
+  assert.deepEqual(fieldsOf(bad({ checkOut: addDays(ci, 366) })), ["checkOut"]);
   assert.ok(fieldsOf(bad({ checkIn: addDays(todayIST(), 400), checkOut: addDays(todayIST(), 402) })).includes("checkIn"));
   assert.ok(fieldsOf(bad({ checkIn: "2030-02-31" })).includes("checkIn"));
   assert.ok(fieldsOf(bad({ checkIn: "tomorrow" })).includes("checkIn"));

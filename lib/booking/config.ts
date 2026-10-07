@@ -1,7 +1,7 @@
 export const CORPORATE_DISCOUNT_PCT = 20;
 
 export const LIMITS = {
-  maxNights: 30,
+  maxNights: 365,
   maxRooms: 6,
   maxAdults: 10,
   maxChildren: 6,
