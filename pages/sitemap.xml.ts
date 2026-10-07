@@ -1,11 +1,17 @@
 import type { GetServerSideProps } from "next";
 import { SITE_URL } from "../data/hotels";
+import { aggregateRooms } from "../data/rooms";
 import { getSiteHotels } from "../lib/siteHotels";
 
 const STATIC_PATHS = ["/", "/hotels"];
 
 export const getServerSideProps: GetServerSideProps = async ({ res }) => {
-  const paths = [...STATIC_PATHS, ...(await getSiteHotels()).map((h) => `/hotels/${h.slug}`)];
+  const hotels = await getSiteHotels();
+  const paths = [
+    ...STATIC_PATHS,
+    ...hotels.map((h) => `/hotels/${h.slug}`),
+    ...aggregateRooms(hotels).map((r) => `/rooms/${r.slug}`),
+  ];
   const urls = paths.map(
     (p) => `  <url><loc>${SITE_URL}${p === "/" ? "" : p}</loc></url>`
   ).join("\n");

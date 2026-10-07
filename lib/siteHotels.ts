@@ -9,6 +9,7 @@ interface DbRoom {
   baths: number;
   maxGuests: number;
   images?: string[];
+  description?: string;
 }
 interface DbHotel {
   slug: string;
@@ -50,6 +51,7 @@ const toHotel = (h: DbHotel): Hotel => ({
       baths: r.baths,
       maxGuests: r.maxGuests,
       images: cleanImages(r.images),
+      description: typeof r.description === "string" ? r.description : "",
     })
   ),
 });

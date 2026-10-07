@@ -1,4 +1,4 @@
-import { ReactNode, useRef } from "react";
+import { ReactNode, useMemo, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -31,7 +31,6 @@ import {
   CITY_EYEBROW,
   CONTACT,
   CORPORATE_PERKS,
-  FEATURED_ROOMS,
   REVIEWS,
   SERVICES,
   STATS,
@@ -40,6 +39,7 @@ import {
   hotelsInCity,
   joinList,
 } from "../../data/hotels";
+import { aggregateRooms, roomImages } from "../../data/rooms";
 import { useBooking } from "./BookingContext";
 import { useHotels } from "./HotelsContext";
 import HotelCard, { HelpCard } from "./HotelCard";
@@ -345,7 +345,10 @@ export function HotelsSection() {
 
 export function RoomsShowcase() {
   const track = useRef<HTMLDivElement>(null);
-  const { focusBar } = useBooking();
+  const hotels = useHotels();
+  // The room types come from the hotels' rooms in the admin, so adding or removing one there changes this list.
+  const rooms = useMemo(() => aggregateRooms(hotels), [hotels]);
+  if (rooms.length === 0) return null;
   const scrollBy = (dir: 1 | -1) =>
     track.current?.scrollBy({
       left: dir * (track.current.clientWidth / 2),
@@ -380,48 +383,52 @@ export function RoomsShowcase() {
           ref={track}
           className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 lg:-mx-2 lg:gap-6 lg:px-2"
         >
-          {FEATURED_ROOMS.map((r, i) => (
+          {rooms.map((r, i) => (
             <Reveal
-              key={r.title}
+              key={r.slug}
               delay={i * 0.08}
               className="w-[280px] shrink-0 snap-start lg:w-[calc(25%-18px)] lg:min-w-[260px]"
             >
-              <article className="group flex h-full flex-col border border-gold/20 bg-surface transition-colors hover:border-gold/60">
+              <article className="group relative flex h-full flex-col border border-gold/20 bg-surface transition-colors hover:border-gold/60">
                 <div className="relative h-60 overflow-hidden">
                   <Image
-                    src={r.image}
-                    alt={`${r.title} room`}
+                    src={roomImages(r, i)[0]}
+                    alt={`${r.name} room`}
                     fill
                     sizes="280px"
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  {r.tag && (
+                  {r.featured && (
                     <span className="absolute left-3 top-3 bg-gold px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-ink">
-                      {r.tag}
+                      Featured
                     </span>
                   )}
                 </div>
                 <div className="flex flex-1 flex-col justify-between p-6">
                   <div>
-                    <h3 className="font-serif text-headline-sm text-on-surface">{r.title}</h3>
+                    <h3 className="font-serif text-headline-sm text-on-surface">
+                      {/* The whole card is the link (see the overlay below). */}
+                      <Link href={`/rooms/${r.slug}`} className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-gold">
+                        {r.name}
+                      </Link>
+                    </h3>
                     <div className="mt-2 flex gap-4 text-[12px] text-on-surface-variant">
                       <span className="flex items-center gap-1.5"><BedDouble size={14} className="text-gold" />{r.beds} bed{r.beds > 1 ? "s" : ""}</span>
                       <span className="flex items-center gap-1.5"><Bath size={14} className="text-gold" />{r.baths} bath</span>
                     </div>
-                    <p className="mt-3 text-body-sm text-on-surface-variant">{r.description}</p>
+                    <p className="mt-3 line-clamp-3 text-body-sm text-on-surface-variant">{r.description}</p>
                   </div>
                   <div className="mt-5 flex items-center justify-between border-t border-gold/20 pt-4">
                     <div>
                       <span className="block text-[11px] text-on-surface-variant">Nightly rate, onwards</span>
-                      <span className="font-serif text-[22px] font-semibold text-gold-soft">{formatINR(r.price)}</span>
+                      <span className="font-serif text-[22px] font-semibold text-gold-soft">{formatINR(r.minPrice)}</span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => focusBar()}
-                      className="border border-gold/40 bg-gold/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-gold-soft transition-colors hover:bg-gold hover:text-ink"
+                    <span
+                      aria-hidden
+                      className="flex items-center gap-1.5 border border-gold/40 bg-gold/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-gold-soft transition-colors group-hover:bg-gold group-hover:text-ink"
                     >
-                      Check
-                    </button>
+                      Details <ArrowRight size={13} />
+                    </span>
                   </div>
                 </div>
               </article>
@@ -429,7 +436,7 @@ export function RoomsShowcase() {
           ))}
         </div>
         <p className="mt-4 text-[12px] text-on-surface-variant/70">
-          Rates vary by hotel. Choose a hotel above to see its exact room types.
+          Rates vary by hotel. Open a room to see which hotels have it.
         </p>
       </div>
     </section>
