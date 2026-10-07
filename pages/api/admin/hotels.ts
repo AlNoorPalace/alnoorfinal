@@ -20,6 +20,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!parsed.success) return sendInvalid(res, parsed.error);
       const result = await adminSaveHotel(db, parsed.data);
       if (!result.ok) return res.status(statusFor(result.error)).json({ error: result.error });
+      if (parsed.data.images !== undefined && !Array.isArray(result.hotel.images))
+        return res.status(409).json({ error: "migration_needed" });
       await revalidateSite(res, [parsed.data.slug]);
       return res.status(parsed.data.mode === "create" ? 201 : 200).json({ hotel: result.hotel });
     }

@@ -20,6 +20,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!parsed.success) return sendInvalid(res, parsed.error);
       const result = await adminSaveRoomType(db, parsed.data);
       if (!result.ok) return res.status(statusFor(result.error)).json({ error: result.error });
+      // A database without the photos migration silently ignores `images`; say so instead of "saving" nothing.
+      if (parsed.data.images !== undefined && !Array.isArray(result.room_type.images))
+        return res.status(409).json({ error: "migration_needed" });
       await revalidateSite(res);
       return res.status(parsed.data.id ? 200 : 201).json({ roomType: result.room_type });
     }
