@@ -191,7 +191,7 @@ begin
   v_kids   := coalesce((p->>'children')::integer, 0);
   v_pct    := least(greatest(coalesce((p->>'discount_pct')::numeric, 0), 0), 100);
 
-  if v_nights < 1 or v_nights > 30 then
+  if v_nights < 1 or v_nights > 365 then
     return jsonb_build_object('ok', false, 'error', 'invalid_dates');
   end if;
   if v_rooms < 1 or v_rooms > 6 or v_adults < 1 or v_kids < 0 then

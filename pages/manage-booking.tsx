@@ -7,6 +7,8 @@ import SiteHeader from "../components/site/SiteHeader";
 import SiteFooter from "../components/site/SiteFooter";
 import type { GetStaticProps } from "next";
 import { CONTACT, Hotel, formatINR } from "../data/hotels";
+import UpiPay from "../components/site/UpiPay";
+import { todayIST } from "../lib/booking/config";
 import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../lib/siteHotels";
 
 interface FoundBooking {
@@ -177,6 +179,12 @@ export default function ManageBooking() {
                     </div>
                   ))}
                 </dl>
+
+                {booking.status === "confirmed" && booking.check_out >= todayIST() && (
+                  <div className="flex justify-center border-t border-gold/20 p-5">
+                    <UpiPay amount={booking.total} reference={booking.reference} />
+                  </div>
+                )}
 
                 <div className="border-t border-gold/20 p-5">
                   {booking.status === "cancelled" ? (
