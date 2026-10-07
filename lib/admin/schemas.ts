@@ -16,6 +16,9 @@ const coord = (min: number, max: number) =>
     .transform((v) => (v === null || v === "" ? null : Number(v)))
     .refine((v) => v === null || (Number.isFinite(v) && v >= min && v <= max), `Must be between ${min} and ${max}`);
 
+const photoList = (max: number) =>
+  z.array(z.string().refine(isAllowedImageUrl, "Use a site photo or upload a photo")).max(max, `At most ${max} photos`);
+
 export const hotelSave = z
   .object({
     mode: z.enum(["create", "update"]),
@@ -33,6 +36,7 @@ export const hotelSave = z
     lat: coord(-90, 90).optional(),
     lng: coord(-180, 180).optional(),
     image: z.string().refine(isAllowedImageUrl, "Choose one of the site photos or upload a photo").optional(),
+    images: photoList(12).optional(),
     amenities: z.array(z.enum(AMENITY_OPTIONS)).max(AMENITY_OPTIONS.length).optional(),
     active: z.boolean().optional(),
     sort_order: z.number().int().min(0).max(1000).optional(),
@@ -57,6 +61,7 @@ export const roomSave = z
     beds: z.number().int().min(1).max(20).optional(),
     baths: z.number().int().min(1).max(20).optional(),
     active: z.boolean().optional(),
+    images: photoList(8).optional(),
   })
   .superRefine((v, ctx) => {
     if (!v.id) {
@@ -84,3 +89,5 @@ export const blockAdd = z.object({
 export const uploadBody = z.object({
   data: z.string().min(100).max(5_000_000), // base64
 });
+
+export const deleteImageBody = z.object({ url: z.string().max(500) });

@@ -1,7 +1,8 @@
 import { useRef, useState } from "react";
 import { AMENITY_OPTIONS, BUNDLED_IMAGES } from "../../data/hotels";
 import type { AdminHotel } from "../../lib/booking/service";
-import { explain, prepareImage, send } from "./api";
+import { deleteUnusedPhotos, explain, send } from "./api";
+import PhotoManager from "./PhotoManager";
 import { FieldError, Label, Notice, btn, btnDanger, btnSolid, field } from "./ui";
 
 interface Form {
@@ -15,22 +16,32 @@ interface Form {
   phone: string;
   lat: string;
   lng: string;
-  image: string;
+  /** Main photo first, then the gallery. */
+  photos: string[];
   amenities: string[];
   active: boolean;
   sort_order: string;
 }
 
+const DEFAULT_PHOTO = "/img/lobby.webp";
+
 const blank = (nextOrder: number): Form => ({
   mode: "create", slug: "", name: "", city: "", state: "", tagline: "", description: "",
-  phone: "", lat: "", lng: "", image: "/img/lobby.webp", amenities: ["Wi-Fi", "Parking"],
+  phone: "", lat: "", lng: "", photos: [], amenities: ["Wi-Fi", "Parking"],
   active: true, sort_order: String(nextOrder),
 });
+
+/** The cover is only a real photo when it is not the default placeholder with nothing else uploaded. */
+const hotelPhotos = (h: AdminHotel): string[] => {
+  const all = [h.image, ...(h.images ?? [])];
+  const real = all.filter((u, i) => all.indexOf(u) === i);
+  return real.length === 1 && real[0] === DEFAULT_PHOTO ? [] : real;
+};
 
 const fromHotel = (h: AdminHotel): Form => ({
   mode: "update", slug: h.slug, name: h.name, city: h.city, state: h.state, tagline: h.tagline,
   description: h.description, phone: h.phone, lat: h.lat === null ? "" : String(h.lat),
-  lng: h.lng === null ? "" : String(h.lng), image: h.image, amenities: h.amenities,
+  lng: h.lng === null ? "" : String(h.lng), photos: hotelPhotos(h), amenities: h.amenities,
   active: h.active, sort_order: String(h.sort_order),
 });
 
@@ -51,12 +62,12 @@ export default function HotelsTab({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<{ tone: "green" | "red"; text: string; slug?: string } | null>(null);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const initialPhotos = useRef<string[]>([]);
   const panelRef = useRef<HTMLDivElement>(null);
 
   const open = (f: Form) => {
     setForm(f);
+    initialPhotos.current = f.photos;
     setErrors({});
     setMessage(null);
     setSlugTouched(f.mode === "update");
@@ -72,13 +83,15 @@ export default function HotelsTab({
     const payload: Record<string, unknown> = {
       mode: form.mode, slug: form.slug.trim(), name: form.name, city: form.city, state: form.state,
       tagline: form.tagline, description: form.description, phone: form.phone,
-      lat: form.lat.trim(), lng: form.lng.trim(), image: form.image, amenities: form.amenities,
+      lat: form.lat.trim(), lng: form.lng.trim(),
+      image: form.photos[0] ?? DEFAULT_PHOTO, images: form.photos.slice(1), amenities: form.amenities,
       active: form.active,
     };
     if (form.sort_order.trim() !== "") payload.sort_order = Number(form.sort_order);
     const { ok, data } = await send("/api/admin/hotels", "POST", payload);
     setSaving(false);
     if (ok) {
+      await deleteUnusedPhotos(initialPhotos.current, form.photos);
       await reload();
       setMessage({
         tone: "green",
@@ -90,23 +103,6 @@ export default function HotelsTab({
     }
     if (data?.fields) setErrors(data.fields);
     else setErrors({ _: explain(data) });
-  };
-
-  const upload = async (file: File | undefined) => {
-    if (!file) return;
-    setUploading(true);
-    setErrors((e) => ({ ...e, image: "" }));
-    try {
-      const dataUrl = await prepareImage(file);
-      const { ok, data } = await send("/api/admin/upload", "POST", { data: dataUrl });
-      if (ok) set({ image: data.url });
-      else setErrors((e) => ({ ...e, image: explain(data, "Could not upload the photo.") }));
-    } catch {
-      setErrors((e) => ({ ...e, image: "Could not read that photo. Try a JPEG, PNG or WebP." }));
-    } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }
   };
 
   const toggleActive = async (h: AdminHotel) => {
@@ -124,7 +120,6 @@ export default function HotelsTab({
     } else setMessage({ tone: "red", text: `${h.name}: ${explain(data)}` });
   };
 
-  const isBundled = form ? BUNDLED_IMAGES.some((i) => i.src === form.image) : false;
   const nextOrder = hotels.reduce((m, h) => Math.max(m, h.sort_order), 0) + 1;
 
   return (
@@ -207,31 +202,17 @@ export default function HotelsTab({
             </div>
 
             <div className="md:col-span-2">
-              <Label>Photo</Label>
-              <div className="flex flex-wrap items-start gap-3">
-                {BUNDLED_IMAGES.map((i) => (
-                  <button key={i.src} type="button" title={i.label} aria-label={`Use photo: ${i.label}`} aria-pressed={form.image === i.src}
-                    onClick={() => set({ image: i.src })}
-                    className={`h-16 w-24 overflow-hidden border-2 ${form.image === i.src ? "border-[#EBC166]" : "border-transparent opacity-70 hover:opacity-100"}`}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={i.src} alt={i.label} className="h-full w-full object-cover" />
-                  </button>
-                ))}
-                {!isBundled && form.image && (
-                  <div className="h-16 w-24 overflow-hidden border-2 border-[#EBC166]" title="Your uploaded photo">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={form.image} alt="Uploaded" className="h-full w-full object-cover" />
-                  </div>
-                )}
-                <div>
-                  <input ref={fileRef} id="h-photo" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => upload(e.target.files?.[0])} />
-                  <button type="button" className={btn} disabled={uploading} onClick={() => fileRef.current?.click()}>
-                    {uploading ? "Uploading…" : "Upload a photo"}
-                  </button>
-                  <p className="mt-1 text-xs text-white/40">JPEG, PNG or WebP. Shrunk automatically.</p>
-                </div>
-              </div>
-              <FieldError msg={errors.image} />
+              <Label hint="The first photo is the cover. The rest fill the hotel's gallery.">Photos</Label>
+              <PhotoManager
+                id="h-photo"
+                photos={form.photos}
+                onChange={(photos) => set({ photos })}
+                max={12}
+                stock={BUNDLED_IMAGES}
+                firstLabel="Cover"
+                emptyNote="No photos yet. The site will show a default photo until you add one."
+              />
+              <FieldError msg={errors.image || errors.images} />
             </div>
 
             <div className="md:col-span-2">
@@ -261,7 +242,7 @@ export default function HotelsTab({
           </div>
           {errors._ && <p role="alert" className="mt-4 text-sm text-[#ffb4ab]">{errors._}</p>}
           <div className="mt-6 flex gap-3">
-            <button className={btnSolid} disabled={saving || uploading} onClick={save}>{saving ? "Saving…" : form.mode === "create" ? "Add hotel" : "Save changes"}</button>
+            <button className={btnSolid} disabled={saving} onClick={save}>{saving ? "Saving…" : form.mode === "create" ? "Add hotel" : "Save changes"}</button>
             <button className={btn} onClick={() => setForm(null)}>Cancel</button>
           </div>
         </div>

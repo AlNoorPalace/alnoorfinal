@@ -90,6 +90,7 @@ export interface AdminRoomType {
   beds: number;
   baths: number;
   active: boolean;
+  images: string[];
   bookings: number;
 }
 
@@ -104,6 +105,7 @@ export interface AdminHotel {
   lat: number | null;
   lng: number | null;
   image: string;
+  images: string[];
   amenities: string[];
   active: boolean;
   sort_order: number;
@@ -140,6 +142,8 @@ export const adminSaveRoomType = (db: Db, v: Record<string, unknown>) =>
   db.rpc<Result<{ room_type: AdminRoomType }>>("admin_save_room_type", v);
 export const adminDeleteRoomType = (db: Db, id: string) =>
   db.rpc<Result<{}>>("admin_delete_room_type", { id });
+
+export const adminImageInUse = (db: Db, url: string) => db.rpc<boolean>("admin_image_in_use", { url });
 
 export const adminCalendar = (db: Db, v: { room_type_id: string; month: string }) =>
   db.rpc<Result<{ room_type: AdminRoomType; days: CalendarDay[] }>>("admin_calendar", v);
