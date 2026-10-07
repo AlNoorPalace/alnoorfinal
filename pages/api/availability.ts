@@ -27,6 +27,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     const nights = nightsFor(parsed.data.checkIn, parsed.data.checkOut);
     const list = await getAvailability(db, parsed.data);
+    if (list.length === 0) {
+      console.warn(
+        `[availability] No active room types found for "${parsed.data.hotel}". ` +
+          "Has supabase/seed.sql been run (or are the rooms switched off in /admin)?"
+      );
+    }
     res.status(200).json({
       nights,
       rooms: list.map((r) => ({

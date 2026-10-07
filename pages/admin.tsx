@@ -166,9 +166,14 @@ function Rooms({ field, btn }: { field: string; btn: string }) {
   const [rows, setRows] = useState<RoomRow[]>([]);
   const [saved, setSaved] = useState<Record<string, string>>({});
   const [error, setError] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    api("/api/admin/rooms").then(({ res, data }) => (res.ok ? setRows(data.roomTypes) : setError("Could not load rooms.")));
+    api("/api/admin/rooms").then(({ res, data }) => {
+      if (res.ok) setRows(data.roomTypes);
+      else setError("Could not load rooms.");
+      setLoaded(true);
+    });
   }, []);
 
   const edit = (id: string, patch: Partial<RoomRow>) => setRows((rs) => rs.map((r) => (r.id === id ? { ...r, ...patch } : r)));
@@ -185,6 +190,11 @@ function Rooms({ field, btn }: { field: string; btn: string }) {
         overbooking protection are based on these counts. New bookings use the rates below.
       </Notice>
       {error && <p role="alert" className="mb-3 text-sm text-[#ffb4ab]">{error}</p>}
+      {loaded && !error && rows.length === 0 && (
+        <p role="status" className="mb-3 border border-[#ffb4ab]/40 bg-[#ffb4ab]/10 p-4 text-sm text-[#ffb4ab]">
+          No room types found, so guests can&apos;t book online. Run <code>supabase/seed.sql</code> in the Supabase SQL Editor, then reload this page.
+        </p>
+      )}
       <div className="overflow-x-auto border border-white/10">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="bg-white/5 text-xs uppercase tracking-wider text-white/60">

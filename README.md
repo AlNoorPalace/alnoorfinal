@@ -132,7 +132,7 @@ npm run dev:db     # embedded Postgres running the real migration + seed on :543
 npm run dev
 ```
 
-Data is kept in memory (set `MOCK_SUPABASE_DATA_DIR=.pglite` to persist). `MOCK_ROOMS_PER_TYPE=2` changes the stock, handy for testing sold-out states. This stand-in is for development and tests only.
+Data is kept in memory (set `MOCK_SUPABASE_DATA_DIR=.pglite` to persist). `MOCK_ROOMS_PER_TYPE=2` changes the stock, handy for testing sold-out states. `MOCK_SKIP_SEED=1` starts with no rooms, to reproduce a missing seed. This stand-in is for development and tests only.
 
 ## Layout
 
