@@ -78,7 +78,7 @@ export function faqsFor(h: Hotel): Faq[] {
     },
     {
       q: "Do you offer corporate rates?",
-      a: "Yes, corporate bookings receive a 20% discount. Tick “Corporate booking” when you choose your room.",
+      a: "Yes, corporate bookings receive a 20% discount. Please call us to arrange it.",
     },
   ];
 }

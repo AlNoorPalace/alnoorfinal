@@ -1,5 +1,3 @@
-export const CORPORATE_DISCOUNT_PCT = 20;
-
 export const LIMITS = {
   maxNights: 365,
   maxRooms: 6,

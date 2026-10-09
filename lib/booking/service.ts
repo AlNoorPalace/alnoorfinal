@@ -1,4 +1,4 @@
-import { CORPORATE_DISCOUNT_PCT, diffDays, todayIST } from "./config";
+import { diffDays, todayIST } from "./config";
 import type { Db } from "./db";
 import type { CreateBookingInput } from "./schemas";
 
@@ -59,8 +59,9 @@ export const createBooking = (db: Db, v: CreateBookingInput) =>
     guest_phone: v.phone,
     guest_email: v.email ?? "",
     notes: v.notes ?? "",
-    corporate: v.corporate,
-    discount_pct: v.corporate ? CORPORATE_DISCOUNT_PCT : 0,
+    // The corporate discount is arranged with the hotel directly, not through online booking.
+    corporate: false,
+    discount_pct: 0,
   });
 
 export const lookupBooking = (db: Db, v: { reference: string; phone: string }) =>

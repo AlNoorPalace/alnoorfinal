@@ -13,14 +13,14 @@ const input = (over: object = {}) =>
     email: "meera@example.com", corporate: false, ...over,
   });
 
-test("service applies the 20% corporate discount only when asked", async () => {
+test("online bookings never get a discount, even if an old page still sends corporate: true", async () => {
   const { dbApi: db } = await makeDb();
   const plain = await createBooking(db, input());
   assert.ok(plain.ok && plain.booking);
   assert.deepEqual([plain.booking.subtotal, plain.booking.discount, plain.booking.total], [5996, 0, 5996]);
-  const corp = await createBooking(db, input({ corporate: true }));
-  assert.ok(corp.ok && corp.booking);
-  assert.deepEqual([corp.booking.discount, corp.booking.total, corp.booking.corporate], [1199, 4797, true]);
+  const old = await createBooking(db, input({ corporate: true }));
+  assert.ok(old.ok && old.booking);
+  assert.deepEqual([old.booking.discount, old.booking.total, old.booking.corporate], [0, 5996, false]);
 });
 
 test("availability, lookup and cancel round-trip through the service layer", async () => {
