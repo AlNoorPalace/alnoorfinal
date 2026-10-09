@@ -4,6 +4,7 @@ import Script from 'next/script';
 import Head from 'next/head';
 import { BookingProvider } from '../components/site/BookingContext';
 import { HotelsProvider } from '../components/site/HotelsContext';
+import { SiteImagesProvider } from '../components/site/SiteImagesContext';
 import BookingModal from '../components/site/BookingModal';
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -69,10 +70,12 @@ function MyApp({ Component, pageProps }: AppProps) {
       </a>
 
       <HotelsProvider hotels={pageProps.hotels}>
-        <BookingProvider>
-          <Component {...pageProps} />
-          <BookingModal />
-        </BookingProvider>
+        <SiteImagesProvider images={pageProps.siteImages}>
+          <BookingProvider>
+            <Component {...pageProps} />
+            <BookingModal />
+          </BookingProvider>
+        </SiteImagesProvider>
       </HotelsProvider>
     </>
   );

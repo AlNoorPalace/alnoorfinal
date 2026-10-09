@@ -113,11 +113,18 @@ export default function HotelsTab({
 
   const remove = async (h: AdminHotel) => {
     if (!window.confirm(`Delete ${h.name}? Its rooms will be removed too. This cannot be undone.`)) return;
-    const { ok, data } = await send("/api/admin/hotels", "DELETE", { slug: h.slug });
-    if (ok) {
+    let res = await send("/api/admin/hotels", "DELETE", { slug: h.slug });
+    if (!res.ok && res.data?.error === "has_bookings") {
+      // Offer to delete the bookings together with the hotel (the booking history is lost).
+      const n = res.data.bookings;
+      if (!window.confirm(`${h.name} has ${n} booking${n === 1 ? "" : "s"}.\n\nDelete the hotel AND all ${n} booking${n === 1 ? "" : "s"} permanently? Guests are not emailed and this cannot be undone.\n\nTo keep the history, press Cancel and use "Hide" instead.`)) return;
+      res = await send("/api/admin/hotels", "DELETE", { slug: h.slug, force: true });
+    }
+    if (res.ok) {
+      await deleteUnusedPhotos([h.image, ...(h.images ?? [])], []);
       setMessage({ tone: "green", text: `${h.name} was deleted.` });
       await reload();
-    } else setMessage({ tone: "red", text: `${h.name}: ${explain(data)}` });
+    } else setMessage({ tone: "red", text: `${h.name}: ${explain(res.data)}` });
   };
 
   const nextOrder = hotels.reduce((m, h) => Math.max(m, h.sort_order), 0) + 1;

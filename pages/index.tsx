@@ -3,6 +3,7 @@ import { hotelGroupJsonLd } from "../data/seo";
 import { Hotel, citiesOf, joinList } from "../data/hotels";
 import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../lib/siteHotels";
 import type { GetStaticProps } from "next";
+import { SiteImages, getSiteImages } from "../lib/siteImages";
 import SiteHeader from "../components/site/SiteHeader";
 import SiteFooter from "../components/site/SiteFooter";
 import BookingBar from "../components/site/BookingBar";
@@ -20,7 +21,7 @@ import {
   TrustStrip,
 } from "../components/site/HomeSections";
 
-export default function Home({ hotels }: { hotels: Hotel[] }) {
+export default function Home({ hotels }: { hotels: Hotel[]; siteImages?: SiteImages }) {
   const cities = joinList(citiesOf(hotels));
   const title = cities ? `Al Noor Group of Hotels | ${cities.replace(/ and /g, " & ")}` : "Al Noor Group of Hotels";
   const description =
@@ -50,7 +51,7 @@ export default function Home({ hotels }: { hotels: Hotel[] }) {
   );
 }
 
-export const getStaticProps: GetStaticProps<{ hotels: Hotel[] }> = async () => ({
-  props: { hotels: await getSiteHotels() },
+export const getStaticProps: GetStaticProps<{ hotels: Hotel[]; siteImages: SiteImages }> = async () => ({
+  props: { hotels: await getSiteHotels(), siteImages: await getSiteImages() },
   revalidate: SITE_REVALIDATE_SECONDS,
 });

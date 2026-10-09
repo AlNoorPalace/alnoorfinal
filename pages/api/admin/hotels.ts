@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const parsed = hotelDelete.safeParse(req.body);
     if (!parsed.success) return sendInvalid(res, parsed.error);
-    const result = await adminDeleteHotel(db, parsed.data.slug);
+    const result = await adminDeleteHotel(db, parsed.data.slug, parsed.data.force === true);
     if (!result.ok) {
       return res.status(statusFor(result.error)).json(result);
     }
