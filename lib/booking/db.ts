@@ -11,6 +11,8 @@ export interface Db {
   uploadImage(path: string, bytes: Buffer, contentType: string): Promise<string>;
   /** Removes a file from the hotel-images bucket. */
   removeImage(path: string): Promise<void>;
+  /** Files in the hotel-images bucket, newest first. */
+  listImages(): Promise<{ name: string; url: string; size: number; createdAt: string | null }[]>;
 }
 
 export class DbError extends Error {}
@@ -39,6 +41,21 @@ export function getDb(): Db | null {
         .upload(path, bytes, { contentType, upsert: false, cacheControl: "31536000" });
       if (error) throw new DbError(`upload: ${error.message}`);
       return `${url.replace(/\/$/, "")}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`;
+    },
+    async listImages() {
+      const { data, error } = await client.storage
+        .from(STORAGE_BUCKET)
+        .list("", { limit: 1000, sortBy: { column: "created_at", order: "desc" } });
+      if (error) throw new DbError(`list: ${error.message}`);
+      const base = `${url.replace(/\/$/, "")}/storage/v1/object/public/${STORAGE_BUCKET}/`;
+      return (data ?? [])
+        .filter((f) => f.id !== null && /\.(jpe?g|png|webp)$/i.test(f.name))
+        .map((f) => ({
+          name: f.name,
+          url: base + f.name,
+          size: Number((f.metadata as { size?: number } | null)?.size ?? 0),
+          createdAt: f.created_at ?? null,
+        }));
     },
     async removeImage(path: string) {
       const { error } = await client.storage.from(STORAGE_BUCKET).remove([path]);

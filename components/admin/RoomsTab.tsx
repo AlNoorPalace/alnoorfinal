@@ -61,7 +61,13 @@ export default function RoomsTab({
 
   const remove = async (r: Row) => {
     if (!window.confirm(`Delete room type "${r.name}"? This cannot be undone.`)) return;
-    const { ok, data } = await send("/api/admin/rooms", "DELETE", { id: r.id });
+    let res = await send("/api/admin/rooms", "DELETE", { id: r.id });
+    if (!res.ok && res.data?.error === "has_bookings") {
+      const n = res.data.bookings;
+      if (!window.confirm(`"${r.name}" has ${n} booking${n === 1 ? "" : "s"}.\n\nDelete the room type AND its ${n} booking${n === 1 ? "" : "s"} permanently? Guests are not emailed and this cannot be undone.\n\nTo keep the history, press Cancel and untick "Bookable" instead.`)) return;
+      res = await send("/api/admin/rooms", "DELETE", { id: r.id, force: true });
+    }
+    const { ok, data } = res;
     if (ok) { setMsg({ tone: "green", text: `Deleted ${r.name}.` }); await deleteUnusedPhotos(saved.current[r.id] ?? [], []); await load(); await reloadHotels(); }
     else setMsg({ tone: "red", text: `${r.name}: ${explain(data)}` });
   };

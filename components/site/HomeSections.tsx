@@ -42,6 +42,7 @@ import {
 import { aggregateRooms, roomImages } from "../../data/rooms";
 import { useBooking } from "./BookingContext";
 import { useHotels } from "./HotelsContext";
+import { useSiteImage } from "./SiteImagesContext";
 import HotelCard, { HelpCard } from "./HotelCard";
 import {
   CountUp,
@@ -90,6 +91,7 @@ const outlineBtn =
 /* ------------------------------------------------------------------ */
 
 export function Hero() {
+  const heroImage = useSiteImage("hero");
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({
@@ -114,7 +116,7 @@ export function Hero() {
           transition={{ duration: 14, ease: "easeOut" }}
         >
           <Image
-            src="/img/hero-facade.webp"
+            src={heroImage}
             alt="Al Noor Palace hotel entrance"
             fill
             priority
@@ -448,24 +450,27 @@ export function RoomsShowcase() {
 /* ------------------------------------------------------------------ */
 
 export function About() {
+  const mainImage = useSiteImage("about_main");
+  const entranceImage = useSiteImage("about_entrance");
+  const corridorImage = useSiteImage("about_corridor");
   return (
     <section id="about" className="scroll-mt-20 border-y border-gold/20 bg-ivory py-16 lg:py-28 text-[#1B1C19]">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 lg:px-margin lg:grid-cols-12 lg:gap-gutter">
         <div className="relative flex min-h-[380px] items-center justify-center lg:col-span-6 lg:min-h-[500px]">
           <RevealImage
-            src="/img/lobby.webp"
+            src={mainImage}
             alt="Al Noor Palace reception and lobby"
             sizes="520px"
             className="relative z-10 h-[250px] w-4/5 border border-gold/40 shadow-xl lg:h-[340px]"
           />
           <RevealImage
-            src="/img/entrance.webp"
+            src={entranceImage}
             alt="Al Noor Palace entrance"
             sizes="300px"
             className="absolute -top-2 right-0 z-20 h-32 w-1/2 border border-gold/50 shadow-2xl lg:h-52"
           />
           <RevealImage
-            src="/img/corridor.webp"
+            src={corridorImage}
             alt="Guest room corridor"
             sizes="300px"
             className="absolute -bottom-4 left-0 z-20 h-28 w-1/2 border border-gold/50 shadow-2xl lg:left-2 lg:h-44"
@@ -554,10 +559,11 @@ export function Amenities() {
 
 export function Corporate() {
   const { focusBar } = useBooking();
+  const bg = useSiteImage("corporate_bg");
   return (
     <section id="corporate" className="relative scroll-mt-20 overflow-hidden border-y border-gold/30 bg-surface py-16 lg:py-24">
       <div className="absolute inset-0 opacity-25">
-        <Image src="/img/facade-close.webp" alt="" fill sizes="100vw" className="object-cover" />
+        <Image src={bg} alt="" fill sizes="100vw" className="object-cover" />
       </div>
       <div className="absolute inset-0 bg-surface-lowest/80" />
       <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 px-6 lg:px-margin lg:grid-cols-12 lg:gap-gutter">
@@ -674,10 +680,11 @@ export function Reviews() {
 
 export function FinalCta() {
   const { focusBar } = useBooking();
+  const bg = useSiteImage("final_cta_bg");
   return (
     <section className="relative overflow-hidden bg-surface-lowest py-16 lg:py-28 text-center">
       <div className="absolute inset-0 opacity-60">
-        <Image src="/img/night-facade.webp" alt="" fill sizes="100vw" className="object-cover" />
+        <Image src={bg} alt="" fill sizes="100vw" className="object-cover" />
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-surface-lowest via-surface-lowest/80 to-surface-lowest" />
       <Reveal className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 lg:px-margin">

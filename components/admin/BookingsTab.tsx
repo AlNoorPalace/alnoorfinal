@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { AdminHotel, Booking } from "../../lib/booking/service";
 import { api, send } from "./api";
-import { Notice, btn, field, inr } from "./ui";
+import { Notice, btn, btnDanger, field, inr } from "./ui";
 
 export default function BookingsTab({ hotels }: { hotels: AdminHotel[] }) {
   const [rows, setRows] = useState<Booking[]>([]);
@@ -28,6 +28,14 @@ export default function BookingsTab({ hotels }: { hotels: AdminHotel[] }) {
     const { ok } = await send("/api/admin/bookings", "POST", { reference });
     if (ok) load();
     else setError("Could not cancel that booking.");
+  };
+
+  const remove = async (reference: string, status: string) => {
+    const extra = status === "confirmed" ? " It is still confirmed: the room is released and the guest is NOT emailed (use Cancel to email them)." : "";
+    if (!window.confirm(`Permanently delete booking ${reference}? This cannot be undone.${extra}`)) return;
+    const { ok } = await send("/api/admin/bookings", "DELETE", { reference });
+    if (ok) load();
+    else setError("Could not delete that booking.");
   };
 
   const confirmed = rows.filter((r) => r.status === "confirmed");
@@ -71,7 +79,12 @@ export default function BookingsTab({ hotels }: { hotels: AdminHotel[] }) {
                 <td className="px-3 py-2">{b.adults}A {b.children}C</td>
                 <td className="px-3 py-2">{inr(b.total)}{b.corporate && <div className="text-xs text-[#EBC166]">corporate</div>}</td>
                 <td className="px-3 py-2"><span className={b.status === "confirmed" ? "text-[#EBC166]" : "text-[#ffb4ab]"}>{b.status}</span></td>
-                <td className="px-3 py-2 text-right">{b.status === "confirmed" && <button className={btn} onClick={() => cancel(b.reference)}>Cancel</button>}</td>
+                <td className="px-3 py-2 text-right">
+                  <div className="flex justify-end gap-2">
+                    {b.status === "confirmed" && <button className={btn} onClick={() => cancel(b.reference)}>Cancel</button>}
+                    <button className={btnDanger} onClick={() => remove(b.reference, b.status)} aria-label={`Delete booking ${b.reference}`}>Delete</button>
+                  </div>
+                </td>
               </tr>
             ))}
             {!loading && rows.length === 0 && <tr><td colSpan={8} className="px-3 py-8 text-center text-white/50">No bookings match.</td></tr>}

@@ -6,6 +6,7 @@ export const MIGRATIONS = [
   "supabase/migrations/20260102000000_hotel_management.sql",
   "supabase/migrations/20260103000000_photos.sql",
   "supabase/migrations/20260104000000_room_descriptions.sql",
+  "supabase/migrations/20260105000000_site_images_and_deletes.sql",
 ];
 
 /** Fresh in-memory Postgres with the real migrations applied (7 hotels, 19 room types). */
@@ -27,6 +28,9 @@ export async function makeDb() {
       throw new Error("image upload is not available in tests");
     },
     async removeImage(): Promise<void> {},
+    async listImages() {
+      return [];
+    },
   };
   return { db, rpc, dbApi };
 }

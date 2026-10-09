@@ -3,17 +3,19 @@ import Head from "next/head";
 import AvailabilityTab from "../components/admin/AvailabilityTab";
 import BookingsTab from "../components/admin/BookingsTab";
 import HotelsTab from "../components/admin/HotelsTab";
+import ImagesTab from "../components/admin/ImagesTab";
 import RoomsTab from "../components/admin/RoomsTab";
 import { api, send } from "../components/admin/api";
 import { Notice, btn, field } from "../components/admin/ui";
 import type { AdminHotel } from "../lib/booking/service";
 
-type Tab = "bookings" | "hotels" | "rooms" | "availability";
+type Tab = "bookings" | "hotels" | "rooms" | "availability" | "images";
 const TABS: { id: Tab; label: string }[] = [
   { id: "bookings", label: "Bookings" },
   { id: "hotels", label: "Hotels" },
   { id: "rooms", label: "Rooms & rates" },
   { id: "availability", label: "Availability" },
+  { id: "images", label: "Images" },
 ];
 
 export default function Admin() {
@@ -80,6 +82,7 @@ export default function Admin() {
             {tab === "bookings" && <BookingsTab hotels={hotels} />}
             {tab === "hotels" && <HotelsTab hotels={hotels} reload={loadHotels} onAddRooms={goRooms} />}
             {tab === "rooms" && <RoomsTab hotels={hotels} hotelSlug={hotelSlug} setHotelSlug={setHotelSlug} reloadHotels={loadHotels} />}
+            {tab === "images" && <ImagesTab />}
             {tab === "availability" && <AvailabilityTab hotels={hotels} initialHotel={hotelSlug} />}
           </>
         )}
