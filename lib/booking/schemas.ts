@@ -47,7 +47,7 @@ export const createBookingBody = z
     phone: z.string().transform(normalizePhone).refine((p) => /^\d{10}$/.test(p), "Enter a valid 10-digit phone number"),
     email: z.string().trim().max(120).email("Enter a valid email address").optional().or(z.literal("")),
     notes: z.string().trim().max(500).optional(),
-    corporate: z.boolean().default(false),
+    corporate: z.boolean().default(false), // ignored: kept so older pages still validate
     /** Honeypot: real users never fill this in. */
     website: z.string().max(0).optional(),
   })

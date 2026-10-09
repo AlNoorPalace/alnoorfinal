@@ -41,8 +41,6 @@ interface Confirmed {
   emailed: boolean;
 }
 
-const CORPORATE_DISCOUNT = 0.2;
-
 const errorText = (code: string, phone: string) =>
   code === "sold_out"
     ? "Sorry, that room was just booked. Please choose another room or different dates."
@@ -62,7 +60,6 @@ export default function BookingModal() {
   const [options, setOptions] = useState<Option[]>([]);
   const [step, setStep] = useState<Step>("room");
   const [selected, setSelected] = useState<string | null>(null);
-  const [corporate, setCorporate] = useState(false);
   const [form, setForm] = useState({ name: "", phone: "", email: "", notes: "", website: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
@@ -165,9 +162,8 @@ export default function BookingModal() {
   const pricing = useMemo(() => {
     if (!room) return null;
     const base = room.rate * nights * search.rooms;
-    const discount = corporate ? Math.round(base * CORPORATE_DISCOUNT) : 0;
-    return { base, discount, total: base - discount };
-  }, [room, nights, search.rooms, corporate]);
+    return { base, total: base };
+  }, [room, nights, search.rooms]);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -201,7 +197,6 @@ export default function BookingModal() {
             phone: form.phone.trim(),
             email: form.email.trim(),
             notes: form.notes.trim(),
-            corporate,
             website: form.website,
           }),
         });
@@ -245,7 +240,6 @@ export default function BookingModal() {
           checkin: search.checkIn,
           checkout: search.checkOut,
           days: nights,
-          isCorporateBooking: corporate,
           query: [
             `${search.adults} adult(s), ${search.children} child(ren), ${search.rooms} room(s)`,
             pricing ? `Estimated total: ${formatINR(pricing.total)}` : "",
@@ -309,11 +303,6 @@ export default function BookingModal() {
                       <span>{room.name} × {nights} × {search.rooms}</span>
                       <span>{formatINR(pricing.base)}</span>
                     </div>
-                    {corporate && (
-                      <div className="mt-1 flex justify-between text-gold">
-                        <span>Corporate 20% off</span><span>−{formatINR(pricing.discount)}</span>
-                      </div>
-                    )}
                     <div className="mt-2 flex items-baseline justify-between">
                       <span className="text-eyebrow uppercase tracking-widest text-gold">{engine ? "Total" : "Est. total"}</span>
                       <span className="font-serif text-[26px] text-on-surface">{formatINR(pricing.total)}</span>
@@ -338,7 +327,7 @@ export default function BookingModal() {
                   </div>
                   {pricing && room && (
                     <div className="mt-2 flex items-baseline justify-between">
-                      <span className="text-[12px] text-on-surface-variant">{room.name}{corporate ? " · 20% off" : ""}</span>
+                      <span className="text-[12px] text-on-surface-variant">{room.name}</span>
                       <span className="font-serif text-[22px] text-gold-soft">{formatINR(pricing.total)}</span>
                     </div>
                   )}
@@ -478,12 +467,6 @@ export default function BookingModal() {
                           <p className="mt-4 text-[14px] text-on-surface-variant">
                             Everything is booked for these dates. Try different dates or call us on {phoneLabel}.
                           </p>
-                        )}
-                        {options.length > 0 && (
-                          <label className="mt-5 flex cursor-pointer items-center gap-3 text-[14px] text-on-surface-variant">
-                            <input type="checkbox" checked={corporate} onChange={(e) => setCorporate(e.target.checked)} className="h-4 w-4 accent-[#C9A24B]" />
-                            Corporate booking <span className="text-gold">(20% discount)</span>
-                          </label>
                         )}
                       </>
                     )}

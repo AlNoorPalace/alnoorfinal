@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST")
     return res.status(405).json({ error: "Method Not allowed" });
 
-  const { room_type, name, phone, email, branch, checkin, checkout, days, query, isCorporateBooking } =
+  const { room_type, name, phone, email, branch, checkin, checkout, days, query } =
     req.body ?? {};
 
   if (!name || !phone || !branch || !checkin || !checkout) {
@@ -33,7 +33,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       <p><strong>Check-in:</strong> ${escapeHtml(checkin)}</p>
       <p><strong>Check-out:</strong> ${escapeHtml(checkout)}</p>
       <p><strong>Days:</strong> ${escapeHtml(days)}</p>
-      <p><strong>Corporate Booking:</strong> ${isCorporateBooking ? "Yes (20% Discount Applied)" : "No"}</p>
       <p><strong>Additional Requests:</strong> ${escapeHtml(query || "None")}</p>
     `,
   };

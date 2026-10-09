@@ -558,7 +558,6 @@ export function Amenities() {
 /* ------------------------------------------------------------------ */
 
 export function Corporate() {
-  const { focusBar } = useBooking();
   const bg = useSiteImage("corporate_bg");
   return (
     <section id="corporate" className="relative scroll-mt-20 overflow-hidden border-y border-gold/30 bg-surface py-16 lg:py-24">
@@ -588,11 +587,11 @@ export function Corporate() {
           </ul>
         </Reveal>
         <Reveal delay={0.15} className="flex flex-col items-stretch gap-4 lg:col-span-5 lg:items-start lg:pl-10">
-          <button type="button" onClick={() => focusBar()} className={goldBtn}>
-            Book Corporate Stay
-          </button>
-          <a href={`tel:${CONTACT.primaryTel}`} className={outlineBtn}>
-            <Phone size={14} className="text-gold" /> {CONTACT.phones[0].label}
+          <a href={`tel:${CONTACT.primaryTel}`} className={goldBtn}>
+            <Phone size={14} /> Call for Corporate Rates
+          </a>
+          <a href={`mailto:${CONTACT.email}?subject=Corporate%20booking`} className={outlineBtn}>
+            Email {CONTACT.email}
           </a>
         </Reveal>
       </div>
