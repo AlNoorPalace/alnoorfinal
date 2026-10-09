@@ -15,7 +15,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "hotels", label: "Hotels" },
   { id: "rooms", label: "Rooms & rates" },
   { id: "availability", label: "Availability" },
-  { id: "images", label: "Images" },
+  { id: "images", label: "Site photos" },
 ];
 
 export default function Admin() {
