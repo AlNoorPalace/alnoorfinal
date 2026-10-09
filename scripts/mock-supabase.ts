@@ -20,6 +20,7 @@ const MIGRATIONS = [
   "supabase/migrations/20260102000000_hotel_management.sql",
   "supabase/migrations/20260103000000_photos.sql",
   "supabase/migrations/20260104000000_room_descriptions.sql",
+  "supabase/migrations/20260105000000_site_images_and_deletes.sql",
 ];
 
 const PUBLIC_FUNCTIONS = new Set([
@@ -27,9 +28,10 @@ const PUBLIC_FUNCTIONS = new Set([
   "admin_list_bookings", "admin_list_hotels", "admin_save_hotel", "admin_delete_hotel",
   "admin_list_room_types", "admin_save_room_type", "admin_delete_room_type",
   "admin_calendar", "admin_list_blocks", "admin_add_block", "admin_delete_block", "admin_image_in_use",
+  "site_images", "admin_set_site_image", "admin_list_site_images", "admin_image_usage", "admin_delete_booking",
 ]);
 
-const photos = new Map<string, { type: string; bytes: Buffer }>();
+const photos = new Map<string, { type: string; bytes: Buffer; created: string }>();
 
 async function main() {
   const db = new PGlite(process.env.MOCK_SUPABASE_DATA_DIR || undefined);
@@ -55,8 +57,15 @@ async function main() {
         if (req.headers.apikey !== KEY) return send(401, { message: "Invalid API key" });
         const chunks: Buffer[] = [];
         for await (const c of req) chunks.push(c as Buffer);
-        photos.set(up[1], { type: String(req.headers["content-type"] || "application/octet-stream"), bytes: Buffer.concat(chunks) });
+        photos.set(up[1], { type: String(req.headers["content-type"] || "application/octet-stream"), bytes: Buffer.concat(chunks), created: new Date().toISOString() });
         return send(200, { Key: `hotel-images/${up[1]}` });
+      }
+      if (req.method === "POST" && req.url === "/storage/v1/object/list/hotel-images") {
+        if (req.headers.apikey !== KEY) return send(401, { message: "Invalid API key" });
+        const files = Array.from(photos.entries())
+          .sort((a, b) => b[1].created.localeCompare(a[1].created))
+          .map(([name, f]) => ({ name, id: name, created_at: f.created, metadata: { size: f.bytes.length, mimetype: f.type } }));
+        return send(200, files);
       }
       if (req.method === "DELETE" && req.url === "/storage/v1/object/hotel-images") {
         if (req.headers.apikey !== KEY) return send(401, { message: "Invalid API key" });

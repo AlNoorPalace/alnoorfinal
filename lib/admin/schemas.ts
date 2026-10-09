@@ -48,7 +48,7 @@ export const hotelSave = z
     }
   });
 
-export const hotelDelete = z.object({ slug });
+export const hotelDelete = z.object({ slug, force: z.boolean().optional() });
 
 export const roomSave = z
   .object({
@@ -73,6 +73,8 @@ export const roomSave = z
   });
 
 export const idBody = z.object({ id: z.string().uuid() });
+export const roomDelete = z.object({ id: z.string().uuid(), force: z.boolean().optional() });
+export const bookingDelete = z.object({ reference: z.string().trim().min(6).max(20) });
 
 export const calendarQuery = z.object({
   roomTypeId: z.string().uuid(),
@@ -92,3 +94,11 @@ export const uploadBody = z.object({
 });
 
 export const deleteImageBody = z.object({ url: z.string().max(500) });
+
+import { SITE_IMAGE_KEYS } from "../siteImagesDefaults";
+
+/** url = "" puts the bundled picture back. */
+export const siteImageSet = z.object({
+  slot: z.enum(SITE_IMAGE_KEYS),
+  url: z.string().max(500).refine((u) => u === "" || isAllowedImageUrl(u), "Use a site photo or upload a photo"),
+});

@@ -135,14 +135,21 @@ export interface RoomBlock {
 export const adminListHotels = (db: Db) => db.rpc<AdminHotel[]>("admin_list_hotels", {});
 export const adminSaveHotel = (db: Db, v: Record<string, unknown>) =>
   db.rpc<Result<{ hotel: AdminHotel }>>("admin_save_hotel", v);
-export const adminDeleteHotel = (db: Db, slug: string) =>
-  db.rpc<Result<{}>>("admin_delete_hotel", { slug });
+export const adminDeleteHotel = (db: Db, slug: string, force = false) =>
+  db.rpc<Result<{ deleted_bookings?: number }>>("admin_delete_hotel", { slug, force });
 
 export const adminListRoomTypes = (db: Db) => db.rpc<AdminRoomType[]>("admin_list_room_types", {});
 export const adminSaveRoomType = (db: Db, v: Record<string, unknown>) =>
   db.rpc<Result<{ room_type: AdminRoomType }>>("admin_save_room_type", v);
-export const adminDeleteRoomType = (db: Db, id: string) =>
-  db.rpc<Result<{}>>("admin_delete_room_type", { id });
+export const adminDeleteRoomType = (db: Db, id: string, force = false) =>
+  db.rpc<Result<{ deleted_bookings?: number }>>("admin_delete_room_type", { id, force });
+
+export const adminDeleteBooking = (db: Db, reference: string) =>
+  db.rpc<Result<{}>>("admin_delete_booking", { reference });
+
+export const adminSetSiteImage = (db: Db, slot: string, url: string) =>
+  db.rpc<Result<{ previous: string | null }>>("admin_set_site_image", { slot, url });
+export const adminImageUsage = (db: Db) => db.rpc<{ url: string; used_by: string[] }[]>("admin_image_usage", {});
 
 export const adminImageInUse = (db: Db, url: string) => db.rpc<boolean>("admin_image_in_use", { url });
 

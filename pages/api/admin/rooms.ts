@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { allow, notConfigured, sendInvalid, serverError, statusFor } from "../../../lib/api";
 import { requireAdmin } from "../../../lib/admin/auth";
-import { idBody, roomSave } from "../../../lib/admin/schemas";
+import { roomDelete, roomSave } from "../../../lib/admin/schemas";
 import { getDb } from "../../../lib/booking/db";
 import { adminDeleteRoomType, adminListRoomTypes, adminSaveRoomType } from "../../../lib/booking/service";
 import { revalidateSite } from "../../../lib/revalidate";
@@ -27,9 +27,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(parsed.data.id ? 200 : 201).json({ roomType: result.room_type });
     }
 
-    const parsed = idBody.safeParse(req.body);
+    const parsed = roomDelete.safeParse(req.body);
     if (!parsed.success) return sendInvalid(res, parsed.error);
-    const result = await adminDeleteRoomType(db, parsed.data.id);
+    const result = await adminDeleteRoomType(db, parsed.data.id, parsed.data.force === true);
     if (!result.ok) return res.status(statusFor(result.error)).json(result);
     await revalidateSite(res);
     res.status(200).json({ ok: true });
