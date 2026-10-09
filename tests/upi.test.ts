@@ -20,3 +20,27 @@ test("reference cannot inject extra UPI parameters", () => {
   assert.equal(l.match(/[?&]pa=/g)!.length, 1);
   assert.equal(l.match(/[?&]am=/g)!.length, 1);
 });
+
+import { minAdvance, parseAdvance } from "../lib/upi";
+
+test("advance: minimum 500, up to the booking total, whole rupees", () => {
+  assert.deepEqual(parseAdvance("500", 1798), { ok: true, amount: 500 });
+  assert.deepEqual(parseAdvance("1798", 1798), { ok: true, amount: 1798 });
+  assert.deepEqual(parseAdvance(" 1000 ", 1798), { ok: true, amount: 1000 });
+  for (const bad of ["", "499", "0", "1799", "12.5", "-600", "abc", "5e3", "1,000", "99999999"])
+    assert.equal(parseAdvance(bad, 1798).ok, false, bad);
+  assert.match((parseAdvance("499", 1798) as any).error, /minimum advance is ₹500/);
+});
+
+test("a bill under 500 can be paid in full", () => {
+  assert.equal(minAdvance(300), 300);
+  assert.equal(minAdvance(5000), 500);
+  assert.deepEqual(parseAdvance("300", 300), { ok: true, amount: 300 });
+  assert.equal(parseAdvance("299", 300).ok, false);
+});
+
+test("the QR link carries exactly the amount typed", () => {
+  const p = parseAdvance("750", 1798);
+  assert.ok(p.ok);
+  assert.match(upiLink((p as any).amount, "ALN-ABC123")!, /am=750\.00/);
+});
