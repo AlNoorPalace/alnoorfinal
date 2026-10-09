@@ -24,3 +24,22 @@ export function upiLink(amountRupees: number, reference: string): string | null 
     .join("&");
   return `upi://pay?${q}`;
 }
+
+/** Smallest advance a guest can pay (or the whole bill, if that is less). */
+export const MIN_ADVANCE = 500;
+
+export const minAdvance = (total: number) => Math.min(MIN_ADVANCE, Math.max(Math.floor(total), 1));
+
+/**
+ * Validates the advance a guest typed. Whole rupees only, from the minimum up to
+ * the booking total. Returns the amount, or an error message to show them.
+ */
+export function parseAdvance(input: string, total: number): { ok: true; amount: number } | { ok: false; error: string } {
+  const text = input.trim();
+  if (!/^\d{1,7}$/.test(text)) return { ok: false, error: "Enter a whole number of rupees." };
+  const amount = Number(text);
+  const min = minAdvance(total);
+  if (amount < min) return { ok: false, error: `The minimum advance is ₹${min}.` };
+  if (amount > total) return { ok: false, error: `That is more than your booking total of ₹${Math.floor(total)}.` };
+  return { ok: true, amount };
+}
