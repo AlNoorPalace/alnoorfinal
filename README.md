@@ -33,7 +33,7 @@ See `.env.example` for the full list with comments.
 | `ADMIN_SESSION_SECRET`      | 32+ random characters used to sign the admin session cookie             |
 | `GMAIL_USER` / `GMAIL_PASS` | Gmail account (and **app password**) that sends booking emails          |
 | `HOTEL_BOOKING_EMAIL`       | Where the hotel's notifications go (default `booking@alnoorpalace.in`)  |
-| `NEXT_PUBLIC_SITE_URL`      | Optional canonical URL (default `https://alnoorpalace.in`)              |
+| `NEXT_PUBLIC_SITE_URL`      | Optional canonical URL (default `https://www.alnoorpalace.in`; set it to whichever address you redirect to)              |
 
 If Supabase is not configured the site still works: it falls back to emailing booking *requests* (needs `GMAIL_*`).
 
