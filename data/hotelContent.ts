@@ -83,12 +83,31 @@ export function faqsFor(h: Hotel): Faq[] {
   ];
 }
 
-// Only Triplicane has documented landmarks in the original site copy.
-export const NEARBY: Record<string, string[]> = {
+export interface NearbyPlace {
+  name: string;
+  /** Approximate distance or travel time, as reported by travel listings (not a live route check). */
+  detail?: string;
+}
+
+// Landmarks written from the hotels' own information. Times are approximate.
+export const NEARBY: Record<string, NearbyPlace[]> = {
   triplicane: [
-    "Marina Beach",
-    "US Embassy",
-    "Parthasarathy Temple",
-    "Apollo Hospitals",
+    { name: "Marina Beach" },
+    { name: "US Embassy" },
+    { name: "Parthasarathy Temple" },
+    { name: "Apollo Hospitals" },
+  ],
+  parrys: [
+    { name: "Fort St. George Museum", detail: "about 8 min" },
+    { name: "Marina Beach", detail: "about 9 min" },
+    { name: "Chennai Central railway station", detail: "about 12 min" },
+    { name: "Government Museum, Chennai", detail: "about 17 min" },
+  ],
+  ooty: [
+    { name: "St. Stephen's Church", detail: "0.6 km, 6 min walk" },
+    { name: "Nilgiri Mountain Railway", detail: "1.1 km, 13 min walk" },
+    { name: "Ooty Lake", detail: "1.5 km, 18 min walk" },
+    { name: "Government Botanical Garden", detail: "2.1 km, 4 min drive" },
+    { name: "Ooty Rose Garden", detail: "2.1 km, 4 min drive" },
   ],
 };

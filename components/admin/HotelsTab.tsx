@@ -11,6 +11,7 @@ interface Form {
   name: string;
   city: string;
   state: string;
+  address: string;
   tagline: string;
   description: string;
   phone: string;
@@ -26,7 +27,7 @@ interface Form {
 const DEFAULT_PHOTO = "/img/lobby.webp";
 
 const blank = (nextOrder: number): Form => ({
-  mode: "create", slug: "", name: "", city: "", state: "", tagline: "", description: "",
+  mode: "create", slug: "", name: "", city: "", state: "", address: "", tagline: "", description: "",
   phone: "", lat: "", lng: "", photos: [], amenities: ["Wi-Fi", "Parking"],
   active: true, sort_order: String(nextOrder),
 });
@@ -39,7 +40,7 @@ const hotelPhotos = (h: AdminHotel): string[] => {
 };
 
 const fromHotel = (h: AdminHotel): Form => ({
-  mode: "update", slug: h.slug, name: h.name, city: h.city, state: h.state, tagline: h.tagline,
+  mode: "update", slug: h.slug, name: h.name, city: h.city, state: h.state, address: h.address ?? "", tagline: h.tagline,
   description: h.description, phone: h.phone, lat: h.lat === null ? "" : String(h.lat),
   lng: h.lng === null ? "" : String(h.lng), photos: hotelPhotos(h), amenities: h.amenities,
   active: h.active, sort_order: String(h.sort_order),
@@ -82,7 +83,7 @@ export default function HotelsTab({
     setErrors({});
     const payload: Record<string, unknown> = {
       mode: form.mode, slug: form.slug.trim(), name: form.name, city: form.city, state: form.state,
-      tagline: form.tagline, description: form.description, phone: form.phone,
+      address: form.address, tagline: form.tagline, description: form.description, phone: form.phone,
       lat: form.lat.trim(), lng: form.lng.trim(),
       image: form.photos[0] ?? DEFAULT_PHOTO, images: form.photos.slice(1), amenities: form.amenities,
       active: form.active,
@@ -176,6 +177,11 @@ export default function HotelsTab({
               <Label htmlFor="h-state">State</Label>
               <input id="h-state" className={`${field} w-full`} value={form.state} onChange={(e) => set({ state: e.target.value })} placeholder="Karnataka" />
               <FieldError msg={errors.state} />
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="h-address" hint="exactly as on the Google Business Profile">Street address</Label>
+              <input id="h-address" className={`${field} w-full`} maxLength={200} value={form.address} onChange={(e) => set({ address: e.target.value })} placeholder="12 Main Road, Area, City, State 600001" />
+              <FieldError msg={errors.address} />
             </div>
             <div className="md:col-span-2">
               <Label htmlFor="h-tagline" hint="one short line">Tagline</Label>

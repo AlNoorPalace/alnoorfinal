@@ -6,6 +6,30 @@ import { Faq } from "./hotelContent";
 const priceRange = (h: Hotel) =>
   minPrice(h) === null ? undefined : `₹${minPrice(h)}–₹${maxPrice(h)}`;
 
+/** The PIN code at the end of a listing address, if there is one. */
+const postalCode = (h: Hotel) => h.address?.match(/\b\d{6}\b/)?.[0];
+
+/** The street line: the listing address without its trailing ", City, State PIN". */
+const streetOf = (h: Hotel): string | undefined => {
+  if (!h.address) return undefined;
+  const parts = h.address.split(",").map((p) => p.trim()).filter(Boolean);
+  const same = (p: string, v: string) => v !== "" && p.replace(/\s*\d{6}$/, "").toLowerCase() === v.toLowerCase();
+  // Drop a trailing "State PIN" and "City" only; "Ooty Club Road" must survive.
+  if (parts.length > 1 && (same(parts[parts.length - 1], h.state) || /^\d{6}$/.test(parts[parts.length - 1]))) parts.pop();
+  if (parts.length > 1 && same(parts[parts.length - 1], h.city)) parts.pop();
+  return parts.join(", ");
+};
+
+/** schema.org postal address. */
+const postalAddress = (h: Hotel) => ({
+  "@type": "PostalAddress",
+  streetAddress: streetOf(h),
+  addressLocality: h.city,
+  addressRegion: h.state || undefined,
+  postalCode: postalCode(h),
+  addressCountry: "IN",
+});
+
 const geo = (h: Hotel) =>
   h.lat === null || h.lng === null
     ? undefined
@@ -45,12 +69,7 @@ export function hotelGroupJsonLd(hotels: Hotel[]) {
           url: `${SITE_URL}/hotels/${h.slug}`,
           telephone: `+91-${hotelPhone(h)}`,
           priceRange: priceRange(h),
-          address: {
-            "@type": "PostalAddress",
-            addressLocality: h.city,
-            addressRegion: h.state || undefined,
-            addressCountry: "IN",
-          },
+          address: postalAddress(h),
           geo: geo(h),
           amenityFeature: h.amenities.map((a) => ({
             "@type": "LocationFeatureSpecification",
@@ -80,12 +99,7 @@ export function hotelPageJsonLd(h: Hotel, faqs: Faq[]) {
         hasMap: h.lat !== null && h.lng !== null ? `https://www.google.com/maps/search/?api=1&query=${h.lat},${h.lng}` : undefined,
         telephone: `+91-${hotelPhone(h)}`,
         priceRange: priceRange(h),
-        address: {
-          "@type": "PostalAddress",
-          addressLocality: h.city,
-          addressRegion: h.state || undefined,
-          addressCountry: "IN",
-        },
+        address: postalAddress(h),
         geo: geo(h),
         amenityFeature: h.amenities.map((a) => ({
           "@type": "LocationFeatureSpecification",
