@@ -1,6 +1,10 @@
 -- Website pictures you can change in the admin, a photo library, and deleting bookings.
 -- Safe to run more than once. Run it after 20260104000000_room_descriptions.sql.
 
+-- Columns from earlier files, repeated (harmless if present) so this file works even if one was skipped.
+alter table public.hotels     add column if not exists images text[] not null default '{}';
+alter table public.room_types add column if not exists images text[] not null default '{}';
+
 -- ---------------------------------------------------------------------------
 -- Website pictures (home page banner, About section, etc.): one row per picture slot.
 -- A slot without a row uses the picture bundled with the site.

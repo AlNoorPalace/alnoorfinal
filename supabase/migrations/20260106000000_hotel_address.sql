@@ -1,6 +1,13 @@
 -- Street address for each hotel (shown on its page and in search results markup).
 -- Safe to run more than once. Run it after 20260105000000_site_images_and_deletes.sql.
 
+
+-- Columns added by earlier files, repeated here (harmless if they already exist) so this file
+-- also works if an earlier one was skipped.
+alter table public.hotels     add column if not exists images      text[] not null default '{}';
+alter table public.room_types add column if not exists images      text[] not null default '{}';
+alter table public.room_types add column if not exists description text   not null default '';
+
 alter table public.hotels add column if not exists address text not null default '';
 
 do $$ begin
