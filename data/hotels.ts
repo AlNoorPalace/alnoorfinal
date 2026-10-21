@@ -4,8 +4,11 @@
 
 // Canonical site URL. Override per environment with NEXT_PUBLIC_SITE_URL.
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://alnoorpalace.in"
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.alnoorpalace.in"
 ).replace(/\/$/, "");
+
+/** Full URL for a site path or an already-absolute photo URL (uploaded photos live on another host). */
+export const absUrl = (src: string) => (/^https?:\/\//.test(src) ? src : `${SITE_URL}${src}`);
 
 export const CONTACT = {
   phones: [
