@@ -16,6 +16,7 @@ interface DbHotel {
   name: string;
   city: string;
   state: string;
+  address?: string;
   tagline: string;
   description: string;
   phone: string;
@@ -35,6 +36,7 @@ const toHotel = (h: DbHotel): Hotel => ({
   name: h.name,
   city: h.city,
   state: h.state ?? "",
+  address: typeof h.address === "string" ? h.address : "",
   tagline: h.tagline ?? "",
   description: h.description ?? "",
   phone: h.phone ?? "",

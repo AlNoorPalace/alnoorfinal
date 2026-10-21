@@ -26,6 +26,7 @@ export const hotelSave = z
     name: z.string().trim().min(2, "Enter the hotel name").max(80).optional(),
     city: z.string().trim().min(2, "Enter the city").max(60).optional(),
     state: z.string().trim().max(60).optional(),
+    address: z.string().trim().max(200, "At most 200 characters").optional(),
     tagline: z.string().trim().max(160).optional(),
     description: z.string().trim().max(1500).optional(),
     phone: z

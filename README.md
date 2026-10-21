@@ -109,6 +109,7 @@ How it works:
    3. `supabase/migrations/20260103000000_photos.sql` (hotel galleries and room photos; run it after the file above)
    4. `supabase/migrations/20260104000000_room_descriptions.sql` (room descriptions for the room pages; run it after the file above)
    5. `supabase/migrations/20260105000000_site_images_and_deletes.sql` (website pictures, photo library, deleting bookings; run it after the file above)
+   6. `supabase/migrations/20260106000000_hotel_address.sql` (hotel street addresses; run it after the file above)
 
    (Or use the Supabase CLI: `supabase db push`.)
 3. In **Project Settings > API** copy the **Project URL** and the **`service_role`** key into `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. Treat the service-role key like a password. **`SUPABASE_URL` must also be set when the site is built** (it lets the site show photos you upload).

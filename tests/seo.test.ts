@@ -27,3 +27,40 @@ test("room page structured data lists each hotel's price", () => {
   assert.equal(node.offers.length, room.offers.length);
   assert.ok(node.offers.every((o: any) => o.priceCurrency === "INR"));
 });
+
+import { HOTELS as H2 } from "../data/hotels";
+import { NEARBY } from "../data/hotelContent";
+import { makeDb } from "./helpers/pg";
+
+test("Parrys and Ooty have their listing address and nearby places", () => {
+  const parrys = H2.find((h) => h.slug === "parrys")!;
+  const ooty = H2.find((h) => h.slug === "ooty")!;
+  assert.match(parrys.address!, /221\/222, NSC Bose Road, Parry's Corner.*600001$/);
+  assert.match(ooty.address!, /Westbury Road.*Hill Bunk, Ooty.*643001$/);
+  assert.equal(NEARBY.parrys.length, 4);
+  assert.equal(NEARBY.ooty.length, 5);
+  assert.ok(NEARBY.parrys.every((n) => n.detail));
+});
+
+test("structured data splits the address into street and PIN code", () => {
+  const g: any = hotelPageJsonLd(H2.find((h) => h.slug === "parrys")!, []);
+  const a = g["@graph"].find((n: any) => n["@type"] === "Hotel").address;
+  assert.equal(a.postalCode, "600001");
+  assert.equal(a.addressLocality, "Chennai");
+  assert.equal(a.streetAddress, "2nd Floor, 221/222, NSC Bose Road, Parry's Corner, George Town");
+  const o: any = hotelPageJsonLd(H2.find((h) => h.slug === "ooty")!, []);
+  assert.equal(o["@graph"].find((n: any) => n["@type"] === "Hotel").address.streetAddress, "158, Westbury Road, 175 B4, Ooty Club Road, Hill Bunk");
+  const noAddr: any = hotelPageJsonLd(H2.find((h) => h.slug === "koyambedu")!, []);
+  assert.equal(noAddr["@graph"][0].address.streetAddress, undefined);
+});
+
+test("database: addresses are loaded for the two branches, editable, and empty elsewhere", async () => {
+  const { rpc } = await makeDb();
+  const list = await rpc("public_hotels", {});
+  assert.match(list.find((h: any) => h.slug === "parrys").address, /NSC Bose Road/);
+  assert.match(list.find((h: any) => h.slug === "ooty").address, /Hill Bunk/);
+  assert.equal(list.find((h: any) => h.slug === "koyambedu").address, "");
+  const r = await rpc("admin_save_hotel", { mode: "update", slug: "koyambedu", address: "1 Test Road, Chennai 600092" });
+  assert.equal(r.hotel.address, "1 Test Road, Chennai 600092");
+  assert.equal((await rpc("admin_save_hotel", { mode: "update", slug: "koyambedu", tagline: "x" })).hotel.address, "1 Test Road, Chennai 600092", "kept");
+});
