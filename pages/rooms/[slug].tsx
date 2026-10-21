@@ -8,7 +8,8 @@ import SiteFooter from "../../components/site/SiteFooter";
 import HotelGallery from "../../components/site/HotelGallery";
 import { useBooking } from "../../components/site/BookingContext";
 import { Reveal, Stagger, StaggerItem } from "../../components/site/motion";
-import { CONTACT, Hotel, ROOM_AMENITIES, SITE_URL, formatINR } from "../../data/hotels";
+import { CONTACT, Hotel, ROOM_AMENITIES, absUrl, formatINR } from "../../data/hotels";
+import { roomPageJsonLd } from "../../data/seo";
 import { RoomKind, aggregateRooms, roomImages } from "../../data/rooms";
 import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../../lib/siteHotels";
 
@@ -36,10 +37,11 @@ export default function RoomPage({ room, others, index, hotelCount }: Props) {
   return (
     <>
       <Seo
-        title={`${room.name} Rooms | Al Noor Group of Hotels`}
+        title={`${room.name} Room from ₹${room.minPrice} | Al Noor Hotels`}
         description={`${room.description} From ${formatINR(room.minPrice)} a night at ${room.offers.length} Al Noor hotel${room.offers.length === 1 ? "" : "s"}.`.slice(0, 200)}
         path={`/rooms/${room.slug}`}
-        image={photos[0].src.startsWith("http") ? photos[0].src : `${SITE_URL}${photos[0].src}`}
+        image={absUrl(photos[0].src)}
+        jsonLd={roomPageJsonLd(room, photos.map((p) => absUrl(p.src)))}
       />
       <SiteHeader solid />
 

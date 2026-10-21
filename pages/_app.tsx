@@ -26,7 +26,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       {/* Meta Pixel Code - Script */}
       <Script
         id="facebook-pixel"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
@@ -46,12 +46,12 @@ function MyApp({ Component, pageProps }: AppProps) {
       {/* Google Ads global site tag (gtag.js) */}
       <Script
         id="google-ads-tag-loader"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         src="https://www.googletagmanager.com/gtag/js?id=AW-17716678921"
       />
       <Script
         id="google-ads-tag-inline"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];

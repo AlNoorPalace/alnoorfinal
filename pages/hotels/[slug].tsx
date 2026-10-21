@@ -31,7 +31,7 @@ import { useBooking } from "../../components/site/BookingContext";
 import { EASE, Reveal, Stagger, StaggerItem } from "../../components/site/motion";
 import {
   ROOM_AMENITIES,
-  SITE_URL,
+  absUrl,
   formatINR,
   Hotel,
   hotelPhone,
@@ -100,13 +100,16 @@ export default function HotelPage({ hotel, hotels }: { hotel: Hotel; hotels: Hot
   const description =
     rawDescription.length > 158 ? `${rawDescription.slice(0, 155).trimEnd()}…` : rawDescription;
 
+  const from = minPrice(hotel);
+  const seoTitle = from !== null ? `${hotel.name}, ${hotel.city} | Rooms from ₹${from} | Al Noor` : `${hotel.name}, ${hotel.city} | Al Noor Group of Hotels`;
+
   return (
     <>
       <Seo
-        title={`${hotel.name}, ${hotel.city} | Al Noor Group of Hotels`}
+        title={seoTitle}
         description={description}
         path={`/hotels/${hotel.slug}`}
-        image={`${SITE_URL}${hotel.image}`}
+        image={absUrl(hotel.image)}
         jsonLd={hotelPageJsonLd(hotel, faqs)}
       />
       <SiteHeader solid />

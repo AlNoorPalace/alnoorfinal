@@ -1,4 +1,6 @@
-import { CONTACT, Hotel, SITE_URL, hotelPhone, maxPrice, minPrice } from "./hotels";
+import { CONTACT, Hotel, SITE_URL, absUrl, hotelPhone, maxPrice, minPrice } from "./hotels";
+import { roomSlug as roomSlugOf } from "./rooms";
+import type { RoomKind } from "./rooms";
 import { Faq } from "./hotelContent";
 
 const priceRange = (h: Hotel) =>
@@ -74,6 +76,8 @@ export function hotelPageJsonLd(h: Hotel, faqs: Faq[]) {
         name: h.name,
         description: h.description || undefined,
         url,
+        image: [h.image, ...(h.images ?? [])].filter((s, i, a) => a.indexOf(s) === i).map(absUrl),
+        hasMap: h.lat !== null && h.lng !== null ? `https://www.google.com/maps/search/?api=1&query=${h.lat},${h.lng}` : undefined,
         telephone: `+91-${hotelPhone(h)}`,
         priceRange: priceRange(h),
         address: {
@@ -91,7 +95,11 @@ export function hotelPageJsonLd(h: Hotel, faqs: Faq[]) {
         containsPlace: h.rooms.map((r) => ({
           "@type": "HotelRoom",
           name: r.name,
+          url: `${SITE_URL}/rooms/${roomSlugOf(r.name)}`,
           occupancy: { "@type": "QuantitativeValue", maxValue: r.maxGuests },
+          bed: { "@type": "BedDetails", numberOfBeds: r.beds },
+          ...(r.images && r.images.length ? { image: r.images.map(absUrl) } : {}),
+          offers: { "@type": "Offer", price: r.price, priceCurrency: "INR", url },
         })),
         parentOrganization: { "@id": `${SITE_URL}/#organization` },
       },
@@ -110,6 +118,41 @@ export function hotelPageJsonLd(h: Hotel, faqs: Faq[]) {
           name: f.q,
           acceptedAnswer: { "@type": "Answer", text: f.a },
         })),
+      },
+    ],
+  };
+}
+
+/** schema.org graph for a room type's page: the room, who offers it, and the breadcrumb. */
+export function roomPageJsonLd(room: RoomKind, images: string[]) {
+  const url = `${SITE_URL}/rooms/${room.slug}`;
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "HotelRoom",
+        "@id": url,
+        name: room.name,
+        description: room.description,
+        url,
+        image: images,
+        occupancy: { "@type": "QuantitativeValue", maxValue: room.maxGuests },
+        bed: { "@type": "BedDetails", numberOfBeds: room.beds },
+        offers: room.offers.map((o) => ({
+          "@type": "Offer",
+          price: o.price,
+          priceCurrency: "INR",
+          url: `${SITE_URL}/hotels/${o.hotelSlug}`,
+          offeredBy: { "@type": "Hotel", name: o.hotelName, url: `${SITE_URL}/hotels/${o.hotelSlug}` },
+        })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Rooms", item: `${SITE_URL}/#rooms` },
+          { "@type": "ListItem", position: 3, name: room.name, item: url },
+        ],
       },
     ],
   };
