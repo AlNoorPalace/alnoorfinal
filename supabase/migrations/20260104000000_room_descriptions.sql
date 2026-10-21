@@ -1,6 +1,7 @@
 -- Room descriptions: shown on each room's own page on the website.
 -- Safe to run more than once. Run it after 20260103000000_photos.sql.
 
+alter table public.room_types add column if not exists images text[] not null default '{}';
 alter table public.room_types add column if not exists description text not null default '';
 
 do $$ begin

@@ -37,6 +37,8 @@ export interface Hotel {
   name: string;
   city: string;
   state: string;
+  /** Street address as on the hotel's Google Business Profile. */
+  address?: string;
   tagline: string;
   description: string;
   phone: string;
@@ -94,6 +96,7 @@ export const HOTELS: Hotel[] = [
     name: "Al Noor Parrys",
     city: "Chennai",
     state: "Tamil Nadu",
+    address: "2nd Floor, 221/222, NSC Bose Road, Parry's Corner, George Town, Chennai, Tamil Nadu 600001",
     tagline: "Commercial hub, seamless city connectivity",
     description:
       "Located in the bustling commercial hub of Parrys, our hotel suits business and leisure travellers alike, with prime access to major transportation hubs across the city.",
@@ -181,6 +184,7 @@ export const HOTELS: Hotel[] = [
     name: "Al Noor Ooty",
     city: "Ooty",
     state: "Tamil Nadu",
+    address: "158, Westbury Road, 175 B4, Ooty Club Road, Hill Bunk, Ooty, Tamil Nadu 643001",
     tagline: "A peaceful retreat in the Nilgiri hills",
     description:
       "Escape to the serene hills of Ooty. Surrounded by tea gardens and cool mountain air, this hotel is a peaceful retreat with every modern comfort for a delightful stay.",

@@ -199,11 +199,17 @@ export default function HotelPage({ hotel, hotels }: { hotel: Hotel; hotels: Hot
                   </div>
                   <ul className="mt-3 flex flex-wrap gap-2">
                     {nearby.map((n) => (
-                      <li key={n} className="border border-gold/30 px-3 py-1.5 text-[13px] text-on-surface">
-                        {n}
+                      <li key={n.name} className="border border-gold/30 px-3 py-1.5 text-[13px] text-on-surface">
+                        {n.name}
+                        {n.detail && <span className="text-on-surface-variant"> · {n.detail}</span>}
                       </li>
                     ))}
                   </ul>
+                  {nearby.some((n) => n.detail) && (
+                    <p className="mt-2 text-[11px] text-on-surface-variant/70">
+                      Distances and times are approximate and vary with traffic. Check Google Maps for your route.
+                    </p>
+                  )}
                 </Reveal>
               )}
             </Section>
@@ -283,6 +289,14 @@ export default function HotelPage({ hotel, hotels }: { hotel: Hotel; hotels: Hot
             </Section>
 
             <Section id="location" eyebrow="Location" title={place}>
+              {hotel.address && (
+                <Reveal>
+                  <address className="mb-5 flex items-start gap-2.5 text-body-md not-italic text-on-surface">
+                    <MapPin size={18} className="mt-0.5 shrink-0 text-gold" />
+                    <span>{hotel.name}, {hotel.address}</span>
+                  </address>
+                </Reveal>
+              )}
               {hasMap ? (
               <Reveal>
                 <div className="overflow-hidden border border-gold/30">

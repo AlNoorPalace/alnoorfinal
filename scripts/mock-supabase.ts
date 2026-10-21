@@ -21,6 +21,7 @@ const MIGRATIONS = [
   "supabase/migrations/20260103000000_photos.sql",
   "supabase/migrations/20260104000000_room_descriptions.sql",
   "supabase/migrations/20260105000000_site_images_and_deletes.sql",
+  "supabase/migrations/20260106000000_hotel_address.sql",
 ];
 
 const PUBLIC_FUNCTIONS = new Set([

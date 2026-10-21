@@ -101,6 +101,7 @@ export interface AdminHotel {
   name: string;
   city: string;
   state: string;
+  address: string;
   tagline: string;
   description: string;
   phone: string;
