@@ -230,6 +230,14 @@ export function TrustStrip() {
 /* Destinations                                                        */
 /* ------------------------------------------------------------------ */
 
+/** Columns by number of cities, so two or three cities get wide cards instead of narrow slivers. */
+const CITY_GRID: Record<number, string> = {
+  1: "lg:grid-cols-1 lg:max-w-2xl",
+  2: "lg:grid-cols-2",
+  3: "lg:grid-cols-3",
+  4: "lg:grid-cols-4",
+};
+
 export function Destinations() {
   const hotels = useHotels();
   const cities = citiesOf(hotels);
@@ -257,21 +265,22 @@ export function Destinations() {
             </p>
           </Reveal>
         </div>
-        <Stagger className="no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 lg:mx-0 lg:grid lg:grid-cols-4 lg:gap-gutter lg:overflow-visible lg:px-0" gap={0.12}>
+        <Stagger className={`no-scrollbar -mx-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 lg:mx-0 lg:grid lg:gap-gutter lg:overflow-visible lg:px-0 ${CITY_GRID[Math.min(tiles.length, 4)]}`} gap={0.12}>
           {tiles.map((t) => {
             const count = hotelsInCity(hotels, t.city).length;
             return (
-              <StaggerItem key={t.city} className="w-[270px] shrink-0 snap-center lg:w-auto">
+              <StaggerItem key={t.city} className="w-[300px] shrink-0 snap-center lg:w-auto">
+                {/* Landscape tiles: the hotel photos are landscape, so tall cards crop and zoom them. */}
                 <Link
                   href={`/hotels?city=${encodeURIComponent(t.city)}`}
-                  className="group relative block h-[360px] overflow-hidden border border-gold/20 lg:h-[480px]"
+                  className={`group relative block overflow-hidden border border-gold/20 ${tiles.length >= 4 ? "aspect-square" : "aspect-[4/3]"}`}
                 >
                   <Image
                     src={t.image}
                     alt={`${t.city} hotels`}
                     fill
-                    sizes="(min-width: 1024px) 280px, 50vw"
-                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    sizes="(min-width: 1024px) 560px, 300px"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-surface-lowest via-surface-lowest/30 to-transparent" />
                   <span className="absolute right-4 top-4 border border-gold/40 bg-surface-lowest/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-gold-soft backdrop-blur-md">
