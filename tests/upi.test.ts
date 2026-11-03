@@ -5,7 +5,7 @@ import { upiLink } from "../lib/upi";
 test("UPI link carries payee, exact amount and booking reference", () => {
   const l = upiLink(1798, "AN-ABC123")!;
   const u = new URL(l.replace("upi://pay", "https://x/pay"));
-  assert.equal(u.searchParams.get("pa"), "7338944222@okbizaxis");
+  assert.equal(u.searchParams.get("pa"), "q715138220@ybl");
   assert.equal(u.searchParams.get("am"), "1798.00");
   assert.equal(u.searchParams.get("cu"), "INR");
   assert.equal(u.searchParams.get("tn"), "Booking AN-ABC123");
