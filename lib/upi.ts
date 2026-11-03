@@ -1,7 +1,7 @@
 /** Where optional advance UPI payments go. Override with NEXT_PUBLIC_UPI_ID / NEXT_PUBLIC_UPI_NAME. */
 export const UPI = {
-  id: process.env.NEXT_PUBLIC_UPI_ID || "7338944222@okbizaxis",
-  name: process.env.NEXT_PUBLIC_UPI_NAME || "Al Noor Group of Hotels",
+  id: process.env.NEXT_PUBLIC_UPI_ID || "q715138220@ybl",
+  name: process.env.NEXT_PUBLIC_UPI_NAME || "Al Noor Residency Business Class Hotel",
 } as const;
 
 const VALID_ID = /^[A-Za-z0-9._-]{2,256}@[A-Za-z][A-Za-z0-9]{1,63}$/;
