@@ -55,6 +55,7 @@ export async function sendBookingEmails(b: Booking): Promise<{ guest: boolean; h
     try {
       await t.sendMail({
         from,
+        replyTo: hotelInbox(), // the guest's replies reach the hotel's booking inbox
         to: b.guest_email,
         subject: `Your booking ${b.reference} at ${hotelName} is confirmed`,
         html: `
