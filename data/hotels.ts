@@ -15,7 +15,7 @@ export const CONTACT = {
     { label: "+91 73389 44222", tel: "+917338944222" },
     { label: "+91 89517 77883", tel: "+918951777883" },
   ],
-  email: "booking@alnoorpalace.in",
+  email: "booking@alnoorresidency.in",
   whatsapp: "https://wa.me/917338944222",
   primaryTel: "+917338944222",
 };

@@ -21,4 +21,4 @@ export function getTransporter() {
   });
 }
 
-export const hotelInbox = () => process.env.HOTEL_BOOKING_EMAIL || "booking@alnoorpalace.in";
+export const hotelInbox = () => process.env.HOTEL_BOOKING_EMAIL || "booking@alnoorresidency.in";
