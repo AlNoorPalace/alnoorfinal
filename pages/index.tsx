@@ -1,6 +1,7 @@
-import Seo from "../components/site/Seo";
+import Head from "next/head";
+import HomeSeo from "../components/site/HomeSeo";
 import { hotelGroupJsonLd } from "../data/seo";
-import { Hotel, citiesOf, joinList } from "../data/hotels";
+import { Hotel } from "../data/hotels";
 import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../lib/siteHotels";
 import type { GetStaticProps } from "next";
 import { SiteImages, getSiteImages } from "../lib/siteImages";
@@ -22,14 +23,14 @@ import {
 } from "../components/site/HomeSections";
 
 export default function Home({ hotels }: { hotels: Hotel[]; siteImages?: SiteImages }) {
-  const cities = joinList(citiesOf(hotels));
-  const title = cities ? `Al Noor Group of Hotels | ${cities.replace(/ and /g, " & ")}` : "Al Noor Group of Hotels";
-  const description =
-    `Comfortable, affordable hotel rooms${cities ? ` in ${cities}` : ""}. ` +
-    `${hotels.length} Al Noor hotel${hotels.length === 1 ? "" : "s"} with 24×7 room service and parking. Book direct for extra perks.`;
   return (
     <>
-      <Seo title={title} description={description} path="/" jsonLd={hotelGroupJsonLd(hotels)} />
+      {/* The owner's search-engine block, exactly as supplied. */}
+      <HomeSeo />
+      {/* The hotel list as structured data (in addition to the block above). */}
+      <Head>
+        <script key="jsonld-hotels" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(hotelGroupJsonLd(hotels)) }} />
+      </Head>
 
       <SiteHeader />
       <main id="main">
