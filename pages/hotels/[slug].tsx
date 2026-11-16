@@ -19,7 +19,9 @@ import {
   Wifi,
   Zap,
 } from "lucide-react";
+import Head from "next/head";
 import Seo from "../../components/site/Seo";
+import ParrysSeo from "../../components/site/ParrysSeo";
 import SiteHeader from "../../components/site/SiteHeader";
 import SiteFooter from "../../components/site/SiteFooter";
 import HotelCard from "../../components/site/HotelCard";
@@ -105,13 +107,24 @@ export default function HotelPage({ hotel, hotels }: { hotel: Hotel; hotels: Hot
 
   return (
     <>
-      <Seo
-        title={seoTitle}
-        description={description}
-        path={`/hotels/${hotel.slug}`}
-        image={absUrl(hotel.image)}
-        jsonLd={hotelPageJsonLd(hotel, faqs)}
-      />
+      {hotel.slug === "parrys" ? (
+        <>
+          {/* The owner's search-engine block for this page, exactly as supplied. */}
+          <ParrysSeo />
+          {/* Rooms, breadcrumb and FAQ as structured data (in addition to the block above). */}
+          <Head>
+            <script key="jsonld-hotel" type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(hotelPageJsonLd(hotel, faqs)) }} />
+          </Head>
+        </>
+      ) : (
+        <Seo
+          title={seoTitle}
+          description={description}
+          path={`/hotels/${hotel.slug}`}
+          image={absUrl(hotel.image)}
+          jsonLd={hotelPageJsonLd(hotel, faqs)}
+        />
+      )}
       <SiteHeader solid />
 
       <main id="main" className="bg-surface-lowest">
