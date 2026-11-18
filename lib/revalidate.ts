@@ -1,4 +1,5 @@
 import type { NextApiResponse } from "next";
+import { LANDING_PAGES } from "../data/landingPages";
 import { aggregateRooms } from "../data/rooms";
 import { getSiteHotels } from "./siteHotels";
 
@@ -17,6 +18,7 @@ export async function revalidateSite(res: NextApiResponse, extraSlugs: string[] 
       "/manage-booking",
       ...Array.from(slugs).map((s) => `/hotels/${s}`),
       ...aggregateRooms(hotels).map((r) => `/rooms/${r.slug}`),
+      ...LANDING_PAGES.map((l) => `/${l.slug}`),
     ];
     await Promise.all(
       paths.map((p) =>
