@@ -42,6 +42,7 @@ import {
 import { NEARBY, faqsFor, galleryFor, roomPhotos } from "../../data/hotelContent";
 import { hotelPageJsonLd } from "../../data/seo";
 import { roomSlug } from "../../data/rooms";
+import { LANDING_PAGES } from "../../data/landingPages";
 import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../../lib/siteHotels";
 
 const AMENITY_ICONS: Record<string, typeof Wifi> = {
@@ -276,6 +277,22 @@ export default function HotelPage({ hotel, hotels }: { hotel: Hotel; hotels: Hot
                 ))}
               </Stagger>
             </Section>
+
+            {hotel.slug === "parrys" && (
+              <Section id="area" eyebrow="Around Parrys" title="Guides for staying in Parrys">
+                <Reveal>
+                  <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {LANDING_PAGES.map((l) => (
+                      <li key={l.slug}>
+                        <Link href={`/${l.slug}`} className="block border border-gold/20 px-4 py-3 text-[14px] text-on-surface transition-colors hover:border-gold/60 hover:text-gold-soft">
+                          {l.h1}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </Reveal>
+              </Section>
+            )}
 
             <Section id="amenities" eyebrow="Amenities" title="Everything you need">
               <Stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3" gap={0.06}>
