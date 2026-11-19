@@ -1,9 +1,25 @@
-import { Html, Head, Main, NextScript } from "next/document";
+import Document, { Html, Head, Main, NextScript } from "next/document";
 
-export default function Document() {
-  return (
+// The Google tag for this site, exactly as supplied by Google. It goes at the start of the
+// <head> of every public page (not the admin dashboard) and must appear only once per page.
+const GOOGLE_TAG_INLINE = `
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+`;
+
+export default class MyDocument extends Document {
+  render() {
+    const isAdmin = this.props.__NEXT_DATA__.page.startsWith("/admin");
+    return (
     <Html lang="en">
       <Head>
+        {!isAdmin && (
+          <>
+            <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-KPHBBKX2"></script>
+            <script dangerouslySetInnerHTML={{ __html: GOOGLE_TAG_INLINE }} />
+          </>
+        )}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -24,5 +40,6 @@ export default function Document() {
         <NextScript />
       </body>
     </Html>
-  );
+    );
+  }
 }
