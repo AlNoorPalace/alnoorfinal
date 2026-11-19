@@ -5,6 +5,7 @@ import Head from 'next/head';
 import { BookingProvider } from '../components/site/BookingContext';
 import { HotelsProvider } from '../components/site/HotelsContext';
 import { SiteImagesProvider } from '../components/site/SiteImagesContext';
+import EnquiryPopup from '../components/site/EnquiryPopup';
 import BookingModal from '../components/site/BookingModal';
 import FloatingContact from '../components/site/FloatingContact';
 
@@ -74,6 +75,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <SiteImagesProvider images={pageProps.siteImages}>
           <BookingProvider>
             <Component {...pageProps} />
+            <EnquiryPopup />
             <BookingModal />
             <FloatingContact />
           </BookingProvider>
