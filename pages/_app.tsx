@@ -6,6 +6,7 @@ import { BookingProvider } from '../components/site/BookingContext';
 import { HotelsProvider } from '../components/site/HotelsContext';
 import { SiteImagesProvider } from '../components/site/SiteImagesContext';
 import BookingModal from '../components/site/BookingModal';
+import FloatingContact from '../components/site/FloatingContact';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -74,6 +75,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           <BookingProvider>
             <Component {...pageProps} />
             <BookingModal />
+            <FloatingContact />
           </BookingProvider>
         </SiteImagesProvider>
       </HotelsProvider>
