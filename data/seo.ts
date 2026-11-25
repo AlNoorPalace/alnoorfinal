@@ -51,7 +51,7 @@ export function hotelGroupJsonLd(hotels: Hotel[]) {
         url: SITE_URL,
         logo: `${SITE_URL}/icon-512.png`,
         email: CONTACT.email,
-        telephone: "+91-7338944222",
+        telephone: "+91-9600158529",
       },
       {
         "@type": "WebSite",

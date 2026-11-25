@@ -43,7 +43,7 @@ import { NEARBY, faqsFor, galleryFor, roomPhotos } from "../../data/hotelContent
 import { hotelPageJsonLd } from "../../data/seo";
 import { roomSlug } from "../../data/rooms";
 import { LANDING_PAGES } from "../../data/landingPages";
-import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../../lib/siteHotels";
+import { SITE_REVALIDATE_SECONDS, getHotelRedirect, getSiteHotels } from "../../lib/siteHotels";
 
 const AMENITY_ICONS: Record<string, typeof Wifi> = {
   "Wi-Fi": Wifi,
@@ -423,6 +423,10 @@ export const getStaticPaths: GetStaticPaths = async () => ({
 export const getStaticProps: GetStaticProps<{ hotel: Hotel; hotels: Hotel[] }> = async ({ params }) => {
   const hotels = await getSiteHotels();
   const hotel = hotels.find((h) => h.slug === String(params?.slug ?? ""));
-  if (!hotel) return { notFound: true, revalidate: 60 };
+  if (!hotel) {
+    const to = await getHotelRedirect(String(params?.slug ?? ""));
+    if (to) return { redirect: { destination: `/hotels/${to}`, permanent: true } };
+    return { notFound: true, revalidate: 60 };
+  }
   return { props: { hotel, hotels }, revalidate: SITE_REVALIDATE_SECONDS };
 };
