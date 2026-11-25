@@ -22,6 +22,7 @@ const MIGRATIONS = [
   "supabase/migrations/20260104000000_room_descriptions.sql",
   "supabase/migrations/20260105000000_site_images_and_deletes.sql",
   "supabase/migrations/20260106000000_hotel_address.sql",
+  "supabase/migrations/20260107000000_phone_and_hotel_url.sql",
 ];
 
 const PUBLIC_FUNCTIONS = new Set([
@@ -29,7 +30,7 @@ const PUBLIC_FUNCTIONS = new Set([
   "admin_list_bookings", "admin_list_hotels", "admin_save_hotel", "admin_delete_hotel",
   "admin_list_room_types", "admin_save_room_type", "admin_delete_room_type",
   "admin_calendar", "admin_list_blocks", "admin_add_block", "admin_delete_block", "admin_image_in_use",
-  "site_images", "admin_set_site_image", "admin_list_site_images", "admin_image_usage", "admin_delete_booking",
+  "site_images", "admin_set_site_image", "admin_list_site_images", "admin_image_usage", "admin_delete_booking", "hotel_redirect",
 ]);
 
 const photos = new Map<string, { type: string; bytes: Buffer; created: string }>();

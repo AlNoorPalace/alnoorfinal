@@ -23,6 +23,8 @@ export const hotelSave = z
   .object({
     mode: z.enum(["create", "update"]),
     slug,
+    /** Update only: a new URL name. The old address redirects to it. */
+    new_slug: slug.optional(),
     name: z.string().trim().min(2, "Enter the hotel name").max(80).optional(),
     city: z.string().trim().min(2, "Enter the city").max(60).optional(),
     state: z.string().trim().max(60).optional(),

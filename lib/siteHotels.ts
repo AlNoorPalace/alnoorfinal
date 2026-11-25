@@ -79,3 +79,15 @@ export async function getSiteHotels(): Promise<Hotel[]> {
     return HOTELS;
   }
 }
+
+/** If `slug` is a hotel's old URL name, the current one (so the old address can redirect); otherwise null. */
+export async function getHotelRedirect(slug: string): Promise<string | null> {
+  const db = getDb();
+  if (!db) return null;
+  try {
+    const to = await db.rpc<string | null>("hotel_redirect", { slug });
+    return typeof to === "string" && to && to !== slug ? to : null;
+  } catch {
+    return null; // the latest database file may not have been run yet
+  }
+}

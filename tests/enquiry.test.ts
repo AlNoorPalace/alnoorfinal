@@ -12,7 +12,7 @@ test("phone numbers: 10-digit Indian mobiles, with or without +91 or 0", () => {
 
 test("the WhatsApp link carries exactly what the guest typed, safely encoded", () => {
   const url = enquiryLink({ name: "Meera & Sons", phone: "+91 9876543210", message: "2 rooms, 10-12 Dec\nCheck-in early?", page: "https://www.alnoorpalace.in/hotels/parrys" });
-  assert.ok(url.startsWith("https://wa.me/917338944222?text="));
+  assert.ok(url.startsWith("https://wa.me/919600158529?text="));
   const text = decodeURIComponent(url.split("?text=")[1]);
   assert.match(text, /Name: Meera & Sons/);
   assert.match(text, /Contact number: \+91 9876543210/);
