@@ -42,7 +42,7 @@ test("every photo file exists and every photo has alt text", () => {
 });
 
 test("structured data: hotel, page, breadcrumb and FAQ", () => {
-  const g: any = landingPageJsonLd(LANDING_PAGES[0], { phone: "7338944222", lat: 13.0855, lng: 80.2822 });
+  const g: any = landingPageJsonLd(LANDING_PAGES[0], { phone: "9600158529", lat: 13.0855, lng: 80.2822 });
   assert.deepEqual(g["@graph"].map((n: any) => n["@type"]), ["Hotel", "WebPage", "BreadcrumbList", "FAQPage"]);
   assert.equal(g["@graph"][0].address.postalCode, "600001");
   assert.equal(g["@graph"][3].mainEntity.length, LANDING_PAGES[0].faqs.length);

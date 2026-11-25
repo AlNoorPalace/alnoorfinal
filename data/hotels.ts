@@ -12,12 +12,11 @@ export const absUrl = (src: string) => (/^https?:\/\//.test(src) ? src : `${SITE
 
 export const CONTACT = {
   phones: [
-    { label: "+91 73389 44222", tel: "+917338944222" },
-    { label: "+91 89517 77883", tel: "+918951777883" },
+    { label: "+91 96001 58529", tel: "+919600158529" },
   ],
   email: "booking@alnoorresidency.in",
-  whatsapp: "https://wa.me/917338944222",
-  primaryTel: "+917338944222",
+  whatsapp: "https://wa.me/919600158529",
+  primaryTel: "+919600158529",
 };
 
 export interface RoomType {
@@ -79,7 +78,7 @@ export const HOTELS: Hotel[] = [
     tagline: "Heritage Chennai, minutes from Marina Beach",
     description:
       "Nestled in the heart of Chennai, our Triplicane location offers a perfect blend of traditional charm and modern comfort, with easy access to the city's cultural landmarks and business districts.",
-    phone: "7338944222",
+    phone: "9600158529",
     lat: 13.0665,
     lng: 80.2789,
     image: "/img/facade-close.webp",
@@ -100,7 +99,7 @@ export const HOTELS: Hotel[] = [
     tagline: "Commercial hub, seamless city connectivity",
     description:
       "Located in the bustling commercial hub of Parrys, our hotel suits business and leisure travellers alike, with prime access to major transportation hubs across the city.",
-    phone: "7338944222",
+    phone: "9600158529",
     lat: 13.0855,
     lng: 80.2822,
     image: "/img/entrance.webp",
@@ -115,7 +114,7 @@ export const HOTELS: Hotel[] = [
     tagline: "Modern stays, also known as Smart Homes",
     description:
       "Also known as Smart Homes, our Koyambedu location offers modern accommodation in the heart of Chennai, perfect for business and leisure travellers seeking comfort and convenience.",
-    phone: "7338944222",
+    phone: "9600158529",
     lat: 13.0665,
     lng: 80.2043,
     image: "/img/night-facade.webp",
@@ -130,7 +129,7 @@ export const HOTELS: Hotel[] = [
     tagline: "In Bengaluru's thriving tech corridor",
     description:
       "Situated in Bengaluru's tech corridor, our Electronic City branch caters to the modern professional, close to major IT parks and corporate offices.",
-    phone: "7338944222",
+    phone: "9600158529",
     lat: 12.8456,
     lng: 77.6634,
     image: "/img/lobby.webp",
@@ -149,7 +148,7 @@ export const HOTELS: Hotel[] = [
     tagline: "One of Bengaluru's most vibrant neighbourhoods",
     description:
       "Premium hospitality in one of Bengaluru's most vibrant neighbourhoods, combining contemporary design with warm service for business travellers and families.",
-    phone: "7338944222",
+    phone: "9600158529",
     lat: 12.9352,
     lng: 77.6245,
     image: "/img/night-grids.webp",
@@ -168,7 +167,7 @@ export const HOTELS: Hotel[] = [
     tagline: "Luxury and convenience in the City of Pearls",
     description:
       "Whether you're visiting for business or exploring the city's rich heritage, our Hyderabad hotel offers a comfortable retreat with attentive service and complete amenities.",
-    phone: "7338944222",
+    phone: "9600158529",
     lat: 17.385,
     lng: 78.4867,
     image: "/img/corridor.webp",
@@ -188,7 +187,7 @@ export const HOTELS: Hotel[] = [
     tagline: "A peaceful retreat in the Nilgiri hills",
     description:
       "Escape to the serene hills of Ooty. Surrounded by tea gardens and cool mountain air, this hotel is a peaceful retreat with every modern comfort for a delightful stay.",
-    phone: "7338944222",
+    phone: "9600158529",
     lat: 11.4102,
     lng: 76.695,
     image: "/img/pool-dusk.webp",

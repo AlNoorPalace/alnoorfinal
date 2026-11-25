@@ -8,6 +8,8 @@ import { FieldError, Label, Notice, btn, btnDanger, btnSolid, field } from "./ui
 interface Form {
   mode: "create" | "update";
   slug: string;
+  /** The URL name when the form was opened (edit only), so it can be renamed. */
+  origSlug: string;
   name: string;
   city: string;
   state: string;
@@ -27,7 +29,7 @@ interface Form {
 const DEFAULT_PHOTO = "/img/lobby.webp";
 
 const blank = (nextOrder: number): Form => ({
-  mode: "create", slug: "", name: "", city: "", state: "", address: "", tagline: "", description: "",
+  mode: "create", slug: "", origSlug: "", name: "", city: "", state: "", address: "", tagline: "", description: "",
   phone: "", lat: "", lng: "", photos: [], amenities: ["Wi-Fi", "Parking"],
   active: true, sort_order: String(nextOrder),
 });
@@ -40,7 +42,7 @@ const hotelPhotos = (h: AdminHotel): string[] => {
 };
 
 const fromHotel = (h: AdminHotel): Form => ({
-  mode: "update", slug: h.slug, name: h.name, city: h.city, state: h.state, address: h.address ?? "", tagline: h.tagline,
+  mode: "update", slug: h.slug, origSlug: h.slug, name: h.name, city: h.city, state: h.state, address: h.address ?? "", tagline: h.tagline,
   description: h.description, phone: h.phone, lat: h.lat === null ? "" : String(h.lat),
   lng: h.lng === null ? "" : String(h.lng), photos: hotelPhotos(h), amenities: h.amenities,
   active: h.active, sort_order: String(h.sort_order),
@@ -82,12 +84,13 @@ export default function HotelsTab({
     setSaving(true);
     setErrors({});
     const payload: Record<string, unknown> = {
-      mode: form.mode, slug: form.slug.trim(), name: form.name, city: form.city, state: form.state,
+      mode: form.mode, slug: (form.mode === "update" ? form.origSlug : form.slug).trim(), name: form.name, city: form.city, state: form.state,
       address: form.address, tagline: form.tagline, description: form.description, phone: form.phone,
       lat: form.lat.trim(), lng: form.lng.trim(),
       image: form.photos[0] ?? DEFAULT_PHOTO, images: form.photos.slice(1), amenities: form.amenities,
       active: form.active,
     };
+    if (form.mode === "update" && form.slug.trim() !== form.origSlug) payload.new_slug = form.slug.trim();
     if (form.sort_order.trim() !== "") payload.sort_order = Number(form.sort_order);
     const { ok, data } = await send("/api/admin/hotels", "POST", payload);
     setSaving(false);
@@ -162,10 +165,11 @@ export default function HotelsTab({
               <FieldError msg={errors.name} />
             </div>
             <div>
-              <Label htmlFor="h-slug" hint={form.mode === "create" ? "used in the web address" : "cannot be changed"}>URL name *</Label>
-              <input id="h-slug" className={`${field} w-full`} value={form.slug} disabled={form.mode === "update"}
-                onChange={(e) => { setSlugTouched(true); set({ slug: slugify(e.target.value) }); }} placeholder="al-noor-mysore" />
-              {form.slug && <p className="mt-1 text-xs text-white/40">/hotels/{form.slug}</p>}
+              <Label htmlFor="h-slug" hint={form.mode === "create" ? "used in the web address" : "you can change it; the old address redirects to the new one"}>URL name *</Label>
+              <input id="h-slug" className={`${field} w-full`} value={form.slug}
+                onChange={(e) => { setSlugTouched(true); set({ slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, "-").slice(0, 40) }); }}
+                onBlur={() => set({ slug: slugify(form.slug) || form.origSlug })} placeholder="al-noor-mysore" />
+              {form.slug && <p className="mt-1 text-xs text-white/40">/hotels/{form.slug}{form.mode === "update" && form.slug !== form.origSlug ? ` (was /hotels/${form.origSlug}, which will redirect here)` : ""}</p>}
               <FieldError msg={errors.slug} />
             </div>
             <div>
