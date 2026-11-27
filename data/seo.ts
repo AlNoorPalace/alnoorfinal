@@ -1,7 +1,6 @@
 import { CONTACT, Hotel, SITE_URL, absUrl, hotelPhone, maxPrice, minPrice } from "./hotels";
 import { roomSlug as roomSlugOf } from "./rooms";
 import type { RoomKind } from "./rooms";
-import type { LandingPage } from "./landingPages";
 import { Faq } from "./hotelContent";
 
 const priceRange = (h: Hotel) =>
@@ -168,61 +167,6 @@ export function roomPageJsonLd(room: RoomKind, images: string[]) {
           { "@type": "ListItem", position: 2, name: "Rooms", item: `${SITE_URL}/#rooms` },
           { "@type": "ListItem", position: 3, name: room.name, item: url },
         ],
-      },
-    ],
-  };
-}
-
-/** schema.org graph for one of the Parrys landing pages: the hotel, this page, breadcrumb and FAQ. */
-export function landingPageJsonLd(page: LandingPage, hotel: { phone: string; lat: number | null; lng: number | null }) {
-  const url = `${SITE_URL}/${page.slug}`;
-  const hotelId = `${SITE_URL}/hotels/parrys`;
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Hotel",
-        "@id": hotelId,
-        name: "Al Noor Residency Business Class Hotel",
-        url: hotelId,
-        image: `${SITE_URL}${page.ogImage}`,
-        telephone: `+91-${hotel.phone}`,
-        address: {
-          "@type": "PostalAddress",
-          streetAddress: "2nd Floor, 221/222, NSC Bose Road, Parry's Corner, George Town",
-          addressLocality: "Chennai",
-          addressRegion: "Tamil Nadu",
-          postalCode: "600001",
-          addressCountry: "IN",
-        },
-        geo: hotel.lat !== null && hotel.lng !== null ? { "@type": "GeoCoordinates", latitude: hotel.lat, longitude: hotel.lng } : undefined,
-        hasMap: hotel.lat !== null && hotel.lng !== null ? `https://www.google.com/maps/search/?api=1&query=${hotel.lat},${hotel.lng}` : undefined,
-      },
-      {
-        "@type": "WebPage",
-        "@id": url,
-        url,
-        name: page.title,
-        description: page.description,
-        inLanguage: "en-IN",
-        about: { "@id": hotelId },
-        primaryImageOfPage: `${SITE_URL}${page.ogImage}`,
-      },
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-          { "@type": "ListItem", position: 2, name: "Parrys hotel", item: hotelId },
-          { "@type": "ListItem", position: 3, name: page.h1, item: url },
-        ],
-      },
-      {
-        "@type": "FAQPage",
-        mainEntity: page.faqs.map((f) => ({
-          "@type": "Question",
-          name: f.q,
-          acceptedAnswer: { "@type": "Answer", text: f.a },
-        })),
       },
     ],
   };
