@@ -3,15 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Check, ChevronRight, MapPin, Navigation, Phone } from "lucide-react";
-import Seo from "../components/site/Seo";
+import LandingSeo from "../components/site/LandingSeo";
 import SiteHeader from "../components/site/SiteHeader";
 import SiteFooter from "../components/site/SiteFooter";
 import HotelGallery from "../components/site/HotelGallery";
 import Faq from "../components/site/Faq";
 import { EASE, Reveal } from "../components/site/motion";
-import { HOTELS, SITE_URL, formatINR, formatPhone, hotelPhone, minPrice } from "../data/hotels";
+import { HOTELS, formatINR, formatPhone, hotelPhone, minPrice } from "../data/hotels";
 import { LANDING_PAGES, LandingPage, PARRYS_ADDRESS, PARRYS_NEARBY, findLanding } from "../data/landingPages";
-import { landingPageJsonLd } from "../data/seo";
 import { SITE_REVALIDATE_SECONDS, getSiteHotels } from "../lib/siteHotels";
 
 interface Props {
@@ -27,13 +26,7 @@ export default function LandingPageView({ page, others, fromPrice, phone, lat, l
   const hasMap = lat !== null && lng !== null;
   return (
     <>
-      <Seo
-        title={page.title}
-        description={page.description}
-        path={`/${page.slug}`}
-        image={`${SITE_URL}${page.ogImage}`}
-        jsonLd={landingPageJsonLd(page, { phone, lat, lng })}
-      />
+      <LandingSeo slug={page.slug} />
       <SiteHeader solid />
 
       <main id="main" className="bg-surface-lowest">

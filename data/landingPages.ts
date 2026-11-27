@@ -16,9 +16,6 @@ export interface LandingSection {
 
 export interface LandingPage {
   slug: string;
-  /** <title> (kept under about 60 characters where possible). */
-  title: string;
-  description: string;
   eyebrow: string;
   h1: string;
   tagline: string;
@@ -26,8 +23,6 @@ export interface LandingPage {
   hero: LandingPhoto;
   /** The photos for this page, hero first. */
   photos: LandingPhoto[];
-  /** 1200x630 picture for link previews (WhatsApp, Facebook, Google Discover). */
-  ogImage: string;
   sections: LandingSection[];
   faqs: { q: string; a: string }[];
   /** Used in the FAQ and intro when the live price is known. */
@@ -64,9 +59,6 @@ const PHOTO = {
 export const LANDING_PAGES: LandingPage[] = [
   {
     slug: "business-class-hotels-in-parrys-corner-chennai",
-    title: "Business Class Hotel in Parrys Corner, Chennai | Al Noor",
-    description:
-      "Business class hotel on NSC Bose Road, Parrys Corner, Chennai. Air-conditioned rooms with a work desk, tea tray and attached bathroom. Pay at the hotel.",
     eyebrow: "Parrys Corner, Chennai",
     h1: "Business class hotel in Parrys Corner, Chennai",
     tagline: "A work-ready room in the middle of Chennai's trading district.",
@@ -74,7 +66,6 @@ export const LANDING_PAGES: LandingPage[] = [
       "Al Noor Residency Business Class Hotel is on the second floor at 221/222, NSC Bose Road, in the commercial heart of George Town. If your day is meetings, markets or a train from Chennai Central, you can be at your desk in the room and out of the door within minutes.",
     hero: PHOTO.workDesk,
     photos: [PHOTO.workDesk, PHOTO.teaTray, PHOTO.reception],
-    ogImage: "/img/parrys/og-business.jpg",
     keywords: ["business class hotel parrys corner", "business stay in chennai", "hotel in parrys corner"],
     sections: [
       {
@@ -113,9 +104,6 @@ export const LANDING_PAGES: LandingPage[] = [
   },
   {
     slug: "budget-hotels-in-parrys-corner-chennai",
-    title: "Budget Hotels in Parrys Corner, Chennai | Al Noor Residency",
-    description:
-      "Clean budget rooms in Parrys Corner, Chennai. Air conditioning, TV, hot water and bottled water included. Book online and pay at the hotel.",
     eyebrow: "Parrys Corner, Chennai",
     h1: "Budget hotel in Parrys Corner, Chennai",
     tagline: "A clean, comfortable room without paying for extras you won't use.",
@@ -123,7 +111,6 @@ export const LANDING_PAGES: LandingPage[] = [
       "You don't need a big-hotel bill to sleep well in Chennai. Al Noor Residency in Parrys Corner keeps it simple: a clean room, a comfortable double bed, air conditioning and hot water, in a location that works for the railway station, the markets and the city's sights.",
     hero: PHOTO.wideRoom,
     photos: [PHOTO.wideRoom, PHOTO.bathroom],
-    ogImage: "/img/parrys/og-budget.jpg",
     keywords: ["budget hotel parrys corner", "cheap hotel parrys chennai", "budget stay chennai central"],
     sections: [
       {
@@ -165,9 +152,6 @@ export const LANDING_PAGES: LandingPage[] = [
   },
   {
     slug: "budget-friendly-hotels-near-madras-high-court-chennai",
-    title: "Budget Hotels near Madras High Court, Chennai | Al Noor",
-    description:
-      "Budget-friendly rooms near the Madras High Court in George Town, Chennai. Air-conditioned, on NSC Bose Road, Parrys Corner. Pay at the hotel.",
     eyebrow: "George Town, Chennai",
     h1: "Budget-friendly hotel near Madras High Court, Chennai",
     tagline: "Stay close to the courts, and close to everything else in George Town.",
@@ -175,7 +159,6 @@ export const LANDING_PAGES: LandingPage[] = [
       "Coming to Chennai for a hearing, a filing or to support a case? Al Noor Residency is in George Town, on NSC Bose Road in Parrys Corner, in the same part of the city as the Madras High Court. You can rest properly the night before and not worry about the morning traffic across the city.",
     hero: PHOTO.tvUnit,
     photos: [PHOTO.tvUnit, PHOTO.corridor, PHOTO.entrance],
-    ogImage: "/img/parrys/og-highcourt.jpg",
     keywords: ["hotels near madras high court", "budget friendly hotels high court chennai", "stay near high court"],
     sections: [
       {
@@ -214,9 +197,6 @@ export const LANDING_PAGES: LandingPage[] = [
   },
   {
     slug: "couple-friendly-hotels-in-egmore",
-    title: "Couple-Friendly Hotel near Egmore, Chennai | Al Noor Residency",
-    description:
-      "A private double room for couples near Egmore, Chennai. Air conditioning, key-card lock and attached bathroom in Parrys Corner. Pay at the hotel.",
     eyebrow: "Near Egmore, Chennai",
     h1: "Couple-friendly hotel near Egmore, Chennai",
     tagline: "A private double room, a short drive from Egmore.",
@@ -224,7 +204,6 @@ export const LANDING_PAGES: LandingPage[] = [
       "Visiting Chennai together? Al Noor Residency in Parrys Corner is a short drive from Egmore and has comfortable double rooms with their own bathroom, a key-card lock on the door and a bed that is made fresh for your arrival.",
     hero: PHOTO.tvDesk,
     photos: [PHOTO.tvDesk, PHOTO.bedFront, PHOTO.waterHeater],
-    ogImage: "/img/parrys/og-egmore.jpg",
     keywords: ["couple friendly hotels egmore", "hotels near egmore chennai", "couple stay chennai"],
     sections: [
       {
@@ -266,9 +245,6 @@ export const LANDING_PAGES: LandingPage[] = [
   },
   {
     slug: "hotels-in-mannady-chennai",
-    title: "Hotels in Mannady, Chennai | Al Noor Residency, Parrys",
-    description:
-      "Rooms near Mannady in George Town, Chennai, for two or three guests. Air-conditioned with an attached bathroom. Al Noor Residency, Parrys. Pay at the hotel.",
     eyebrow: "Mannady & George Town, Chennai",
     h1: "Hotels in Mannady, Chennai",
     tagline: "Stay next to Mannady's wholesale streets, and sleep well.",
@@ -276,7 +252,6 @@ export const LANDING_PAGES: LandingPage[] = [
       "Mannady is the old wholesale quarter of George Town, full of traders, shops and early mornings. Al Noor Residency is on NSC Bose Road in Parrys Corner, in the same neighbourhood, so you can finish at the market and be back in your room in a few minutes.",
     hero: PHOTO.doubleSingle,
     photos: [PHOTO.doubleSingle, PHOTO.extraBed],
-    ogImage: "/img/parrys/og-mannady.jpg",
     keywords: ["hotels in mannady", "hotel rooms in mannady chennai", "stay near mannady"],
     sections: [
       {
